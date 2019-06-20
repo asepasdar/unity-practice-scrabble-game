@@ -1,0 +1,26 @@
+fileFormatVersion: 2
+guid: a0c0e149aa5ca9a47b8cad94b76fd759
+timeCreated: 1557977524
+licenseType: Free
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Purista
+  fontNames:
+  - Purista
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 1ee8ba805721d274bad62a78c58c2afc, type: 3}
+  - {fileID: 12800000, guid: 42ec62041ec6f46428d30e8e9677c7d0, type: 3}
+  - {fileID: 12800000, guid: 9f4b00fa24b5fa84283138625af5c13f, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
