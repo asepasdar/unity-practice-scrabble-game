@@ -4,7 +4,8 @@ using UnityEngine.EventSystems;
 
 public class MyControll : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler {
     public static GameObject draggedObject;
-    public string huruf;
+    [SerializeField] public string huruf;
+    [SerializeField] public int urutan, point;
     Vector3 startPosition, defaultPosition;
     Transform startParent, defaultParent;
 
