@@ -10,6 +10,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
     [SerializeField] GameObject prefabWord;
     [SerializeField] AudioSource slotAudio;
     [SerializeField] private GameObject defaultTile, recallBtn, shuffleBtn;
+    [SerializeField] private Text scoreText;
 
     //singleton
     private static WordsGame _instance;
@@ -17,7 +18,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
     //tempat untuk dict words
     private HashSet<string> dicWords = new HashSet<string>();
     private TextAsset dictText;
-
+    private HashSet<string> wordInPoint = new HashSet<string>();
     //tempat untuk semua data word dan point dari scritable object
     private Word[] wordList;
     
@@ -25,6 +26,9 @@ public class WordsGame : MonoBehaviour, IHasChanged {
     //Kebutuhan untuk grid dan input player
     public int[][] wordSet = new int[6][];
     public MyControll[][] grid = new MyControll[15][];
+
+    //Score pemain
+    private int score = 0;
     
 
     public static WordsGame Instance { get { return _instance; } }
@@ -77,30 +81,177 @@ public class WordsGame : MonoBehaviour, IHasChanged {
         }
 
     }
+    private int checkForPoint(string hasil, int point)
+    {
+        if (CheckWord(hasil, 1))
+        {
+            if (wordInPoint.Contains(hasil))
+                return 0;
+            else
+            {
+                wordInPoint.Add(hasil);
+                return point;
+            }
+        }
+        else
+            return 0;
+    }
+
+    private void clearControl()
+    {
+        foreach(int[] word in wordSet)
+        {
+            if(grid[word[0]][word[1]] != null)
+            {
+                grid[word[0]][word[1]].canDrag = false;
+            }
+        }
+    }
     public void playSlotAudio()
     {
         slotAudio.Play();
     }
-    public void polaKanan(int row, int col)
+    // INI KUMPULAN FUNGSI PENGECEKAN WORD SESUAI POLA MASING2
+
+    //Pola Pengecekan nilai dari kanan ke kiri
+    private int polaKiri(int row, int col)
     {
         string hasil = "";
-        for (int i = col; i < 15; i++)
+        int point = 0;
+
+        if (col == 0)
+            return 0;
+        else if (grid[row][col - 1] == null || grid[row][col] == null)
+            return 0;
+
+        for(int i = col; i >= 0; i--)
         {
-            if (grid[row][i] != null)
-                Debug.Log("Baris ke "+row + " kolom ke " + i);
+            if(grid[row][i] != null)
+            {
+                hasil = grid[row][i].GetComponent<MyControll>().huruf + hasil;
+                point += grid[row][i].GetComponent<MyControll>().point;
+            }
             else
                 break;
         }
+
+        return checkForPoint(hasil, point);
+    }
+    //Pola pengecekan nilai dari kiri ke kanan
+    public int polaKanan(int row, int col)
+    {
+        string hasil = "";
+        int point = 0;
+        if (col == 14)
+            return 0;
+        else if (grid[row][col + 1] == null || grid[row][col] == null)
+            return 0;
+
+        for (int i = col; i < 15; i++)
+        {
+            if (grid[row][i] != null) { 
+                hasil += grid[row][i].GetComponent<MyControll>().huruf;
+                point += grid[row][i].GetComponent<MyControll>().point;
+            }
+            else
+                break;
+        }
+        return checkForPoint(hasil, point);
         
     }
+    //Pola pengecekan nilai dari atas ke bawah
+    public int polaBawah(int row, int col)
+    {
+        string hasil = "";
+        int point = 0;
+
+        if (row == 14)
+            return 0;
+        else if (grid[row + 1][col] == null || grid[row][col] == null)
+            return 0;
+
+        for (int i = row; i < 15; i++)
+        {
+            if (grid[i][col] != null)
+            {
+                hasil += grid[i][col].GetComponent<MyControll>().huruf;
+                point += grid[i][col].GetComponent<MyControll>().point;
+            }
+            else
+                break;
+        }
+
+        return checkForPoint(hasil, point);
+    }
+    //Pola pengecekan nilai dari bawah ke atas
+    public int polaAtas(int row, int col)
+    {
+        string hasil = "";
+        int point = 0;
+
+        if (row == 0)
+            return 0;
+        else if (grid[row - 1][col] == null || grid[row][col] == null)
+            return 0;
+
+        for(int i = row; i >= 0; i--)
+        {
+            if (grid[i][col] != null)
+            {
+                hasil = grid[i][col].GetComponent<MyControll>().huruf + hasil;
+                point += grid[i][col].GetComponent<MyControll>().point;
+            }
+            else
+                break;
+        }
+
+        return checkForPoint(hasil, point);
+    }
+    //Pola pengecekan nilai serong bawah kanan
+    public int polaKananBawah(int row, int col)
+    {
+        string hasil = "";
+        int point = 0;
+        int endLoop = col > row ? 15 - col : 15 - row;
+
+        if (row == 14 || col == 14)
+            return 0;
+        else if (grid[row + 1][col + 1] == null || grid[row][col] == null)
+            return 0;
+        
+        for(int i =0; i < endLoop; i++)
+        {
+            if (grid[row][col] != null)
+            {
+                hasil += grid[row][col].GetComponent<MyControll>().huruf;
+                point += grid[row][col].GetComponent<MyControll>().point;
+                row++;
+                col++;
+            }
+            else
+                break;
+        }
+
+        return checkForPoint(hasil, point);
+    }
+
+    //END KUMPULAN FUNGSI PENGECEKAN
 
     public void submitWords()
     {
-        Debug.Log(grid[0][1]);
         foreach(int[] word in wordSet)
         {
-            polaKanan(word[0], word[1]);
+            score += polaKanan(word[0], word[1]);
+            score += polaKiri(word[0], word[1]);
+            score += polaAtas(word[0], word[1]);
+            score += polaBawah(word[0], word[1]);
+            score += polaKananBawah(word[0], word[1]);
         }
+        scoreText.text = "Score : " + score.ToString();
+        clearControl();
+        ResetWordSet();
+        RandomWord();
+        RecallOrShuffle();
     }
 
     public void RandomWord()
@@ -134,6 +285,8 @@ public class WordsGame : MonoBehaviour, IHasChanged {
         return false;
     }
 
+
+    //Kebutuhan fungsi Control pemain
     public void RecallOrShuffle()
     {
         if (isWordInGrid())
@@ -146,11 +299,6 @@ public class WordsGame : MonoBehaviour, IHasChanged {
             recallBtn.SetActive(false);
             shuffleBtn.SetActive(true);
         }
-    }
-
-    public void checkWordsPoint()
-    {
-
     }
 
     public void Recall()
@@ -174,10 +322,12 @@ public class WordsGame : MonoBehaviour, IHasChanged {
         ResetWordSet();
         RandomWord();
     }
+    // End kebutuhan fungsi control pemain
 
     #region IHasChanged implementation
     public void hasChanged()
     {
+        /*
         System.Text.StringBuilder builder = new System.Text.StringBuilder();
         builder.Append(" - ");
         foreach (Transform row in slots)
@@ -194,7 +344,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
             
         }
         words.text = builder.ToString();
-
+        */
         //Check apakah ada kata yang sesuai
     }
 

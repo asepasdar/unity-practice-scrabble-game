@@ -6,6 +6,7 @@ public class MyControll : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
     public static GameObject draggedObject;
     [SerializeField] public string huruf;
     [SerializeField] public int urutan, point;
+    [SerializeField] public bool canDrag = true;
     Vector3 startPosition, defaultPosition;
     Transform startParent, defaultParent;
 
@@ -22,18 +23,23 @@ public class MyControll : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDr
     #region IBeginDragHandler implementation
     public void OnBeginDrag(PointerEventData eventData)
     {
-        draggedObject = gameObject;
-        startPosition = transform.position;
-        startParent = transform.parent;
-        GetComponent<CanvasGroup>().blocksRaycasts = false;
-        transform.SetParent(transform.root);
+        if (canDrag)
+        {
+            draggedObject = gameObject;
+            startPosition = transform.position;
+            startParent = transform.parent;
+            GetComponent<CanvasGroup>().blocksRaycasts = false;
+            transform.SetParent(transform.root);
+        }
     }
     #endregion
 
     #region IDragHandler implementation
     public void OnDrag(PointerEventData eventData)
     {
-        transform.position = Input.mousePosition;
+        if (canDrag)
+            transform.position = Input.mousePosition;
+
     }
     #endregion
 
