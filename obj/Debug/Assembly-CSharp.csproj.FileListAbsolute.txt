@@ -1,0 +1,2 @@
+D:\unity\Scrabble\obj\Debug\Assembly-CSharp.csprojAssemblyReference.cache
+D:\unity\Scrabble\obj\Debug\Assembly-CSharp.csproj.CoreCompileInputs.cache
