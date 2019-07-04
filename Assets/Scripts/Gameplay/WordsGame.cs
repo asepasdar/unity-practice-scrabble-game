@@ -39,37 +39,35 @@ public class WordsGame : MonoBehaviour, IHasChanged {
 
 
     public static WordsGame Instance { get { return _instance; } }
-
+    private const string ipadd = "172.16.7.20:45456";
     void Awake()
     {
         scoreText.text = PlayerPrefs.GetInt("room_id").ToString() + " " + System.DateTime.Now;
-
-        StartCoroutine(GetRequest("https://localhost:44330/api/values/" + PlayerPrefs.GetInt("room_id"), returnValue => {
+        StartCoroutine(GetRequest("https://"+ipadd+"/api/values/" + PlayerPrefs.GetInt("room_id"), returnValue => {
             roomData = JSON.Parse(returnValue);
 
             //Get detail user rm
-            StartCoroutine(GetRequest("https://localhost:44330/api/user/" + roomData["user_rm"], rval => {
+            StartCoroutine(GetRequest("https://" + ipadd + "/api/user/" + roomData["user_rm"], rval => {
                 user_rmData = JSON.Parse(rval);
             }));
 
             //Get detail user guest
-            StartCoroutine(GetRequest("https://localhost:44330/api/user/" + roomData["user_guest"], rguest => {
+            StartCoroutine(GetRequest("https://" + ipadd + "/api/user/" + roomData["user_guest"], rguest => {
                 user_guestData = JSON.Parse(rguest);
+                InvokeRepeating("startPlay", 0f, 1f);
             }));
+
+            JSONObject j = new JSONObject(JSONObject.Type.OBJECT);
+            j.AddField("id", roomData["id"].ToString());
+            j.AddField("user_rm", roomData["user_rm"].ToString());
+            j.AddField("user_guest", roomData["user_guest"].ToString());
+            j.AddField("status", 2);
+            StartCoroutine(PostRequest("https://" + ipadd + "/api/start/", j.Print(), myCallback => {
+            }));
+            
         }));
 
-        System.DateTime time = System.DateTime.Now;
-        if (time.Second == 0) Invoke("startPlay", 5 + 5);
-        else if (time.Second < 5)
-            Invoke("startPlay", 5 + 5 - time.Second);
-        else
-        {
-            var helper = ((Mathf.Ceil(time.Second / 5)) * 5) - time.Second;
-            if (helper < 0)
-                Invoke("startPlay", helper + 5 + 5);
-            else
-                Invoke("startPlay", helper + 5);
-        }
+        
 
         InitializeDictionary("ospd"); //load dict word
         wordList = Resources.LoadAll<Word>("Words"); //Data word scriptable object
@@ -85,25 +83,44 @@ public class WordsGame : MonoBehaviour, IHasChanged {
         //init array untuk satu set huruf yang sedang dipakai
         //array ini digunakan sebagai tracking huruf di grid keberapa
         for (int i2 = 0; i2 < wordSet.Length; i2++) wordSet[i2] = new int[2];
+
+        
     }
     void startPlay()
     {
-        cover.SetActive(false);
-        if (PlayerPrefs.GetInt("user_id") == user_guestData["id"])
+        if (!checkPlay())
         {
-            scoreBoard.transform.parent.GetChild(0).GetComponent<Text>().text = user_guestData["name"];
-            scoreBoard.transform.parent.GetChild(1).GetComponent<Text>().text = user_rmData["name"];
-            enemyData = user_rmData;
-            ChangeControl();
-            StartCoroutine(waitForEnemy());
+            StartCoroutine(GetRequest("https://" + ipadd + "/api/values/" + PlayerPrefs.GetInt("room_id"), returnValue =>
+            {
+                roomData = returnValue;
+                checkPlay();
+            }));
         }
-        else
+    }
+    public bool checkPlay()
+    {
+        if (roomData["ready_p1"] == 1 && roomData["ready_p2"] == 1)
         {
-            scoreBoard.transform.parent.GetChild(1).GetComponent<Text>().text = user_guestData["name"];
-            scoreBoard.transform.parent.GetChild(0).GetComponent<Text>().text = user_rmData["name"];
-            enemyData = user_guestData;
-            StartCoroutine(autoSubmit());
+            cover.SetActive(false);
+            if (PlayerPrefs.GetInt("user_id") == user_guestData["id"])
+            {
+                scoreBoard.transform.parent.GetChild(0).GetComponent<Text>().text = user_guestData["name"];
+                scoreBoard.transform.parent.GetChild(1).GetComponent<Text>().text = user_rmData["name"];
+                enemyData = user_rmData;
+                ChangeControl();
+                StartCoroutine(waitForEnemy());
+            }
+            else
+            {
+                scoreBoard.transform.parent.GetChild(1).GetComponent<Text>().text = user_guestData["name"];
+                scoreBoard.transform.parent.GetChild(0).GetComponent<Text>().text = user_rmData["name"];
+                enemyData = user_guestData;
+                StartCoroutine(autoSubmit());
+            }
+            CancelInvoke();
+            return true;
         }
+        return false;
     }
     void setScoreBoard(int enemyOrPlayer, int abcd, int score)
     {
@@ -182,7 +199,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
         j.AddField("turn", enemyTurn);
         j.AddField("user_id", enemyData["id"].ToString());
         j.AddField("room_id", PlayerPrefs.GetInt("room_id"));
-        StartCoroutine(PostRequest("https://localhost:44330/api/game/"+enemyTurn, j.Print(), returnValue => {
+        StartCoroutine(PostRequest("https://" + ipadd + "/api/game/" + enemyTurn, j.Print(), returnValue => {
             var data = JSON.Parse(returnValue);
             setScoreBoard(1, enemyTurn, data["point"]);
             setEnemyWord(data["list"]);
@@ -252,6 +269,13 @@ public class WordsGame : MonoBehaviour, IHasChanged {
     }
     void Quit()
     {
+        JSONObject j = new JSONObject(JSONObject.Type.OBJECT);
+        j.AddField("id", roomData["id"].ToString());
+        j.AddField("user_rm", roomData["user_rm"].ToString());
+        j.AddField("user_guest", roomData["user_guest"].ToString());
+        j.AddField("status", 3);
+        StartCoroutine(PostRequest("https://" + ipadd + "/api/start/", j.Print(), myCallback => {
+        }));
         PlayerPrefs.DeleteKey("room_id");
         SceneManager.LoadScene(0);
     }
@@ -452,7 +476,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
         j.AddField("list", list);
 
 
-        StartCoroutine(PostRequest("https://localhost:44330/api/game", j.Print(), returnValue => {
+        StartCoroutine(PostRequest("https://" + ipadd + "/api/game", j.Print(), returnValue => {
             var data = JSON.Parse(returnValue);
             setScoreBoard(0, turn, data["point"]);
             myScore += data["point"];

@@ -7,26 +7,79 @@ using System.Net;
 using SimpleJSON;
 using System;
 using UnityEngine.SceneManagement;
+using Facebook.Unity;
+using Facebook.MiniJSON;
 
 public class LobbyList : MonoBehaviour {
 
-    [SerializeField] GameObject prefabRoom, waitLobby, listLobby, loginPanel, wait;
-    
-    [SerializeField] InputField username, password;
+    [SerializeField] GameObject prefabRoom, waitLobby, listLobby, loginPanel, wait, error;
+    [SerializeField] Image profile;
+    [SerializeField] Text nama, checkErrorFacebook;
+    [SerializeField] Sprite male, female;
 
-    [SerializeField] Text informasiLogin, waktuPlay;
-
-
-    void Awake()
-    {
-        //PlayerPrefs.DeleteAll();
-        if (!isAlreadyLogin())
-            loginPanel.SetActive(true);
-    }
+    private const string ipadd = "172.16.7.20:45456";
+    JSONNode rvData;
     // Use this for initialization
     void Start()
     {
+        //Start init facebook SDK
+        if (!FB.IsInitialized)
+            FB.Init(InitCallback, OnHideUnity);
+        else
+            FB.ActivateApp();
+        //End Init Facebook SDK
+
+        //Check status server dan game version
+        StartCoroutine(GetRequest("https://" + ipadd + "/api/start", returnValue => {
+            var data = JSON.Parse(returnValue);
+            if (data["status"] != "ok")
+                error.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = data["message"];
+            else
+                error.SetActive(false);
+        }));
+        PlayerPrefs.DeleteAll();
+        if (!isAlreadyLogin())
+            loginPanel.SetActive(true);
+        else
+            setProfile();
+
         refreshLobby();
+    }
+
+    //Fungsi untuk geust
+    public void tryGuestLogin()
+    {
+        JSONObject j = new JSONObject(JSONObject.Type.OBJECT);
+        j.AddField("fb_id", "guest");
+        j.AddField("device_id", SystemInfo.deviceUniqueIdentifier);
+        j.AddField("name", "Guest"+ UnityEngine.Random.Range(0, 1000000).ToString());
+        
+
+        StartCoroutine(PostRequest("https://" + ipadd + "/api/facebook/0", j.Print(), returnValue => {
+            JSONNode data = JSON.Parse(returnValue);
+            if (data["id"] != 0)
+            {
+                PlayerPrefs.SetInt("user_id", data["id"]);
+                PlayerPrefs.SetString("name", data["name"]);
+                PlayerPrefs.SetString("token", data["token"]);
+                PlayerPrefs.SetString("fb_id", data["fb_id"]);
+                PlayerPrefs.SetString("gender", "");
+                loginPanel.SetActive(false);
+                nama.text = data["name"];
+            }
+        }));
+    }
+    //End fungsi
+
+    //Fungsi switch dan pengecekan data user
+    private void setProfile()
+    {
+        nama.text = PlayerPrefs.GetString("name");
+        if (PlayerPrefs.GetString("gender") == "male")
+            profile.sprite = male;
+        else if (PlayerPrefs.GetString("gender") == "female")
+            profile.sprite = female;
+
     }
     private bool isAlreadyLogin()
     {
@@ -62,7 +115,7 @@ public class LobbyList : MonoBehaviour {
         GameObject userGuest = waitLobby.transform.GetChild(0).GetChild(1).gameObject;
         userMaster.transform.GetChild(0).GetComponent<Text>().text = PlayerPrefs.GetString("name");
         userGuest.SetActive(false);
-        InvokeRepeating("checkGuest", 0f, 5f);
+        InvokeRepeating("checkGuest", 0f, 1f);
     }
     private void switchToJoin(JSONNode data)
     {
@@ -75,50 +128,16 @@ public class LobbyList : MonoBehaviour {
         userGuest.transform.GetChild(0).GetComponent<Text>().text = PlayerPrefs.GetString("name");
         readyToGo();
     }
-    private void checkGuest()
-    {
-        Debug.Log("fungsi check guest dijalankan");
-        StartCoroutine(GetRequest("https://localhost:44330/api/values/" + PlayerPrefs.GetInt("room_id"), returnValue => {
-            var rvData = JSON.Parse(returnValue);
-            Debug.Log(rvData["user_guest"]);
-            if (rvData["user_guest"] != 1)
-            {
-                StartCoroutine(GetRequest("https://localhost:44330/api/user/" + rvData["user_guest"], rval =>
-                {
-                    var data = JSON.Parse(rval);
-                    GameObject userGuest = waitLobby.transform.GetChild(0).GetChild(1).gameObject;
-                    userGuest.SetActive(true);
-                    userGuest.transform.GetChild(0).GetComponent<Text>().text = data["name"];
-                    readyToGo();
-                }));
-            }
-        }));
-    }
-    private void readyToGo()
-    {
-        CancelInvoke();
-        DateTime time = DateTime.Now;
-        if (time.Second == 0) goPlay();
-        else if (time.Second < 5) Invoke("goPlay", 5 - time.Second);
-        else
-        {
-            var helper = ((Mathf.Ceil(time.Second / 5)) * 5) - time.Second;
-            if (helper < 0)
-                Invoke("goPlay", helper + 5);
-            else
-                Invoke("goPlay", helper);
-        }
-    }
-    private void goPlay()
-    {
-        SceneManager.LoadScene(1);
-    }
     private void switchToLobby()
     {
         listLobby.SetActive(true);
         waitLobby.SetActive(false);
         PlayerPrefs.DeleteKey("room_id");
     }
+    //End fungsi
+
+
+    //Fungsi sebelum masuk kedalam lobby
     private void clearLobby()
     {
         for(int i =0; i < listLobby.transform.GetChild(0).childCount; i++)
@@ -128,7 +147,7 @@ public class LobbyList : MonoBehaviour {
     }
     public void refreshLobby()
     {
-        StartCoroutine(GetRequest("https://localhost:44330/api/values", returnValue => {
+        StartCoroutine(GetRequest("https://" + ipadd + "/api/values", returnValue => {
             showLobbyToUser(returnValue);
         }));
     }
@@ -156,12 +175,13 @@ public class LobbyList : MonoBehaviour {
         roomData.AddField("status", 1);
         roomData.AddField("time_created", DateTime.Now.ToString());
 
-        StartCoroutine(PostRequest("https://localhost:44330/api/values/" + roomId, roomData.Print(), returnValue => {
+        StartCoroutine(PostRequest("https://" + ipadd + "/api/values/" + roomId, roomData.Print(), returnValue => {
             var rvData = JSON.Parse(returnValue);
-            StartCoroutine(GetRequest("https://localhost:44330/api/user/" + rvData["user_rm"], rval => {
+            PlayerPrefs.SetInt("room_id", roomId);
+            StartCoroutine(GetRequest("https://" + ipadd + "/api/user/" + rvData["user_rm"], rval => {
                 var data = JSON.Parse(rval);
-                PlayerPrefs.SetInt("room_id", roomId);
                 switchToJoin(data);
+                Debug.Log(PlayerPrefs.GetInt("room_id"));
             }));
         }));
     }
@@ -172,8 +192,7 @@ public class LobbyList : MonoBehaviour {
         roomData.AddField("user_rm", PlayerPrefs.GetInt("user_id"));
         roomData.AddField("user_guest", 1);
         roomData.AddField("status", 1);
-        roomData.AddField("time_created", DateTime.Now.ToString());
-        StartCoroutine(PostRequest("https://localhost:44330/api/values", roomData.Print(), returnValue => {
+        StartCoroutine(PostRequest("https://" + ipadd + "/api/values", roomData.Print(), returnValue => {
             wait.SetActive(false);
             var data = JSON.Parse(returnValue);
             if (data["id"] == 0)
@@ -185,38 +204,145 @@ public class LobbyList : MonoBehaviour {
             }
         }));
     }
-    public void Login()
+    //End fungsi
+
+
+    //Fungsi setelah didalam lobby
+    private void checkGuest()
     {
-        JSONObject userData = new JSONObject(JSONObject.Type.OBJECT);
-        userData.AddField("id", 0);
-        userData.AddField("name", username.text);
-        userData.AddField("pass", password.text);
-        userData.AddField("created_at", DateTime.Now.ToString());
-        StartCoroutine(PostRequest("https://localhost:44330/api/user", userData.Print(), returnValue => {
-            var data = JSON.Parse(returnValue);
-            if(data["name"] == null)
-                informasiLogin.text = "Kombinasi Username & Password salah";
-            else
+        StartCoroutine(GetRequest("https://" + ipadd + "/api/values/" + PlayerPrefs.GetInt("room_id"), returnValue => {
+            rvData = JSON.Parse(returnValue);
+            Debug.Log(rvData["user_guest"]);
+            if (rvData["user_guest"] != 1 && rvData["user_guest"] != 0)
             {
-                PlayerPrefs.SetInt("user_id", data["id"]);
-                PlayerPrefs.SetString("name", data["name"]);
-                loginPanel.SetActive(false);
+                StartCoroutine(GetRequest("https://" + ipadd + "/api/user/" + rvData["user_guest"], rval =>
+                {
+                    var data = JSON.Parse(rval);
+                    GameObject userGuest = waitLobby.transform.GetChild(0).GetChild(1).gameObject;
+                    userGuest.SetActive(true);
+                    userGuest.transform.GetChild(0).GetComponent<Text>().text = data["name"];
+                    readyToGo();
+                }));
             }
         }));
     }
     public void DeleteLobby()
     {
-        StartCoroutine(DeleteRequest("https://localhost:44330/api/values", PlayerPrefs.GetInt("room_id"), ret =>
+        StartCoroutine(DeleteRequest("https://" + ipadd + "/api/values", PlayerPrefs.GetInt("room_id"), ret =>
         {
-            StartCoroutine(GetRequest("https://localhost:44330/api/values/" + PlayerPrefs.GetInt("room_id"), returnValue =>
+            StartCoroutine(GetRequest("https://" + ipadd + "/api/values/" + PlayerPrefs.GetInt("room_id"), returnValue =>
             {
                 var data = JSON.Parse(returnValue);
-                Debug.Log(data);
+                CancelInvoke();
                 if (data["id"] == 0)
                     switchToLobby();
             }));
         }));
     }
+    private void readyToGo()
+    {
+        CancelInvoke();
+        JSONObject j = new JSONObject(JSONObject.Type.OBJECT);
+        Debug.Log(PlayerPrefs.GetInt("user_id"));
+        Debug.Log(rvData["user_rm"]);
+        if (PlayerPrefs.GetInt("user_id") == rvData["user_rm"])
+        {
+            j.AddField("id", rvData["id"].ToString());
+            j.AddField("user_rm", rvData["user_rm"].ToString());
+            j.AddField("ready_p1", "1");
+        }
+        else
+        {
+            j.AddField("id", rvData["id"].ToString());
+            j.AddField("user_guest", rvData["user_guest"].ToString());
+            j.AddField("ready_p2", "1");
+        }
+
+        StartCoroutine(PostRequest("https://" + ipadd + "/api/start/0", j.Print(), rReady => { }));
+
+        DateTime time = DateTime.Now;
+        if (time.Second == 0) goPlay();
+        else if (time.Second < 5) Invoke("goPlay", 5 - time.Second);
+        else
+        {
+            var helper = ((Mathf.Ceil(time.Second / 5)) * 5) - time.Second;
+            if (helper < 0)
+                Invoke("goPlay", helper + 5);
+            else
+                Invoke("goPlay", helper);
+        }
+    }
+    private void goPlay()
+    {
+        SceneManager.LoadScene(1);
+    }
+    //End fungsi setelah didalam lobby
+
+    //Facbook SDK
+    public void tryFacebookLogin()
+    {
+        var perms = new List<string>() { "public_profile", "email"};
+        FB.LogInWithReadPermissions(perms, AuthCallback);
+    }
+    private void AuthCallback(ILoginResult result)
+    {
+        if (FB.IsLoggedIn)
+        {
+            checkErrorFacebook.text = "OK";
+            checkErrorFacebook.text += AccessToken.CurrentAccessToken;
+            var aToken = Facebook.Unity.AccessToken.CurrentAccessToken;
+            FB.API("/me?fields=name,gender", HttpMethod.GET, r => {
+                IDictionary dict = Json.Deserialize(r.RawResult) as IDictionary;
+
+                JSONObject j = new JSONObject(JSONObject.Type.OBJECT);
+                j.AddField("fb_id", aToken.UserId);
+                j.AddField("device_id", SystemInfo.deviceUniqueIdentifier);
+                j.AddField("name", dict["name"].ToString());
+
+                StartCoroutine(PostRequest("https://" + ipadd + "/api/facebook", j.Print(), returnValue => {
+                    JSONNode data = JSON.Parse(returnValue);
+                    checkErrorFacebook.text += "masuk api";
+                    if (data["id"] != 0)
+                    {
+                        PlayerPrefs.SetInt("user_id", data["id"]);
+                        PlayerPrefs.SetString("name", data["name"]);
+                        PlayerPrefs.SetString("token", data["token"]);
+                        PlayerPrefs.SetString("fb_id", data["fb_id"]);
+                        PlayerPrefs.SetString("gender", dict["gender"].ToString());
+                        nama.text = dict["name"].ToString();
+                        loginPanel.SetActive(false);
+
+                        if (dict["gender"].ToString() == "male")
+                            profile.sprite = male;
+                        else if (dict["gender"].ToString() == "female")
+                            profile.sprite = female;
+                    }
+                }));
+            });
+
+        }
+        else
+        {
+            checkErrorFacebook.text = "cancel";
+        }
+    }
+    private void InitCallback()
+    {
+        if (FB.IsInitialized)
+            FB.ActivateApp();
+        else
+            Debug.Log("Failed to Initialize the Facebook SDK");
+    }
+    private void OnHideUnity(bool isGameShown)
+    {
+        if (!isGameShown)
+            Time.timeScale = 0;
+        else
+            Time.timeScale = 1;
+    }
+    //End Facebook SDK
+
+    //fungsi request to API
     IEnumerator GetRequest(string uri, Action<String> callback = null)
     {
         ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => false;
@@ -225,6 +351,7 @@ public class LobbyList : MonoBehaviour {
             //Accept all certificates
             webRequest.certificateHandler = new AcceptAllCertificatesSignedWithASpecificKeyPublicKey();
             webRequest.SetRequestHeader("token", "123123");
+            webRequest.SetRequestHeader("game_version", Application.version);
             // Request and wait for the desired page.
             yield return webRequest.SendWebRequest();
 
@@ -251,7 +378,6 @@ public class LobbyList : MonoBehaviour {
             callback(args);
         }
     }
-
     IEnumerator PostRequest(string url, string json, Action<string> callback = null)
     {
         byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(json);
@@ -263,7 +389,8 @@ public class LobbyList : MonoBehaviour {
         uwr.SetRequestHeader("Content-Type", "application/json");
         uwr.SetRequestHeader("Accept", "application/json");
         uwr.SetRequestHeader("token", "123123");
-        uwr.SetRequestHeader("api-version", "0.1");
+        uwr.SetRequestHeader("game_version", "1.0");
+        uwr.SetRequestHeader("device_id", SystemInfo.deviceUniqueIdentifier);
         uwr.certificateHandler = new AcceptAllCertificatesSignedWithASpecificKeyPublicKey();
 
         //Send the request then wait here until it returns
@@ -275,6 +402,7 @@ public class LobbyList : MonoBehaviour {
         else
             callback(uwr.downloadHandler.text);
     }
+    //End Fungsi request to API
 }
 class AcceptAllCertificatesSignedWithASpecificKeyPublicKey : CertificateHandler
 {
