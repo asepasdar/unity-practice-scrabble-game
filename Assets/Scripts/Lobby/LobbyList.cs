@@ -14,10 +14,10 @@ public class LobbyList : MonoBehaviour {
 
     [SerializeField] GameObject prefabRoom, waitLobby, listLobby, loginPanel, wait, error;
     [SerializeField] Image profile;
-    [SerializeField] Text nama, checkErrorFacebook;
+    [SerializeField] Text nama;
     [SerializeField] Sprite male, female;
 
-    private const string ipadd = "172.16.7.20:45456";
+    private const string ipadd = "172.16.8.67:45456";
     JSONNode rvData;
     // Use this for initialization
     void Start()
@@ -37,7 +37,7 @@ public class LobbyList : MonoBehaviour {
             else
                 error.SetActive(false);
         }));
-        PlayerPrefs.DeleteAll();
+        //PlayerPrefs.DeleteAll();
         if (!isAlreadyLogin())
             loginPanel.SetActive(true);
         else
@@ -84,7 +84,15 @@ public class LobbyList : MonoBehaviour {
     private bool isAlreadyLogin()
     {
         if (PlayerPrefs.HasKey("user_id"))
-            return true;
+        {
+            if (PlayerPrefs.GetString("fb_id") == "guest")
+                return true;
+            else
+            {
+                PlayerPrefs.DeleteAll();
+                return false;
+            }
+        }
 
         return false;
     }
@@ -176,12 +184,15 @@ public class LobbyList : MonoBehaviour {
         roomData.AddField("time_created", DateTime.Now.ToString());
 
         StartCoroutine(PostRequest("https://" + ipadd + "/api/values/" + roomId, roomData.Print(), returnValue => {
-            var rvData = JSON.Parse(returnValue);
+            var rData = JSON.Parse(returnValue);
             PlayerPrefs.SetInt("room_id", roomId);
-            StartCoroutine(GetRequest("https://" + ipadd + "/api/user/" + rvData["user_rm"], rval => {
+            StartCoroutine(GetRequest("https://" + ipadd + "/api/user/" + rData["user_rm"], rval => {
                 var data = JSON.Parse(rval);
-                switchToJoin(data);
-                Debug.Log(PlayerPrefs.GetInt("room_id"));
+                StartCoroutine(GetRequest("https://" + ipadd + "/api/values/" + PlayerPrefs.GetInt("room_id"), rGet => {
+                    rvData = JSON.Parse(rGet);
+                    switchToJoin(data);
+                    Debug.Log(PlayerPrefs.GetInt("room_id"));
+                }));
             }));
         }));
     }
@@ -212,7 +223,7 @@ public class LobbyList : MonoBehaviour {
     {
         StartCoroutine(GetRequest("https://" + ipadd + "/api/values/" + PlayerPrefs.GetInt("room_id"), returnValue => {
             rvData = JSON.Parse(returnValue);
-            Debug.Log(rvData["user_guest"]);
+            
             if (rvData["user_guest"] != 1 && rvData["user_guest"] != 0)
             {
                 StartCoroutine(GetRequest("https://" + ipadd + "/api/user/" + rvData["user_guest"], rval =>
@@ -242,23 +253,7 @@ public class LobbyList : MonoBehaviour {
     private void readyToGo()
     {
         CancelInvoke();
-        JSONObject j = new JSONObject(JSONObject.Type.OBJECT);
-        Debug.Log(PlayerPrefs.GetInt("user_id"));
-        Debug.Log(rvData["user_rm"]);
-        if (PlayerPrefs.GetInt("user_id") == rvData["user_rm"])
-        {
-            j.AddField("id", rvData["id"].ToString());
-            j.AddField("user_rm", rvData["user_rm"].ToString());
-            j.AddField("ready_p1", "1");
-        }
-        else
-        {
-            j.AddField("id", rvData["id"].ToString());
-            j.AddField("user_guest", rvData["user_guest"].ToString());
-            j.AddField("ready_p2", "1");
-        }
-
-        StartCoroutine(PostRequest("https://" + ipadd + "/api/start/0", j.Print(), rReady => { }));
+        
 
         DateTime time = DateTime.Now;
         if (time.Second == 0) goPlay();
@@ -281,15 +276,18 @@ public class LobbyList : MonoBehaviour {
     //Facbook SDK
     public void tryFacebookLogin()
     {
+        if(FB.IsLoggedIn)
+            FB.LogOut();
+
         var perms = new List<string>() { "public_profile", "email"};
         FB.LogInWithReadPermissions(perms, AuthCallback);
     }
     private void AuthCallback(ILoginResult result)
     {
+        Debug.Log(result);
         if (FB.IsLoggedIn)
         {
-            checkErrorFacebook.text = "OK";
-            checkErrorFacebook.text += AccessToken.CurrentAccessToken;
+            Debug.Log("Saya berhaisl login");
             var aToken = Facebook.Unity.AccessToken.CurrentAccessToken;
             FB.API("/me?fields=name,gender", HttpMethod.GET, r => {
                 IDictionary dict = Json.Deserialize(r.RawResult) as IDictionary;
@@ -301,9 +299,10 @@ public class LobbyList : MonoBehaviour {
 
                 StartCoroutine(PostRequest("https://" + ipadd + "/api/facebook", j.Print(), returnValue => {
                     JSONNode data = JSON.Parse(returnValue);
-                    checkErrorFacebook.text += "masuk api";
+                    Debug.Log(data);
                     if (data["id"] != 0)
                     {
+                        Debug.Log("Return berhasil");
                         PlayerPrefs.SetInt("user_id", data["id"]);
                         PlayerPrefs.SetString("name", data["name"]);
                         PlayerPrefs.SetString("token", data["token"]);
@@ -317,13 +316,17 @@ public class LobbyList : MonoBehaviour {
                         else if (dict["gender"].ToString() == "female")
                             profile.sprite = female;
                     }
+                    else
+                    {
+                        Debug.Log("Return gagal brooooo");
+                    }
                 }));
             });
 
         }
         else
         {
-            checkErrorFacebook.text = "cancel";
+            Debug.Log("cancel");
         }
     }
     private void InitCallback()
@@ -331,7 +334,10 @@ public class LobbyList : MonoBehaviour {
         if (FB.IsInitialized)
             FB.ActivateApp();
         else
-            Debug.Log("Failed to Initialize the Facebook SDK");
+        {
+            Debug.Log("gagal init");
+        }
+            
     }
     private void OnHideUnity(bool isGameShown)
     {

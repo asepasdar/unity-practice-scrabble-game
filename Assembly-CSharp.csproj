@@ -311,17 +311,17 @@
  <Reference Include="Facebook.Unity">
  <HintPath>D:/unity/Scrabble/Assets/FacebookSDK/Plugins/Facebook.Unity.dll</HintPath>
  </Reference>
+ <Reference Include="Facebook.Unity.Android">
+ <HintPath>D:/unity/Scrabble/Assets/FacebookSDK/Plugins/Android/Facebook.Unity.Android.dll</HintPath>
+ </Reference>
+ <Reference Include="Facebook.Unity.IOS">
+ <HintPath>D:/unity/Scrabble/Assets/FacebookSDK/Plugins/Android/Facebook.Unity.IOS.dll</HintPath>
+ </Reference>
  <Reference Include="Facebook.Unity.Gameroom">
  <HintPath>D:/unity/Scrabble/Assets/FacebookSDK/Plugins/Gameroom/Facebook.Unity.Gameroom.dll</HintPath>
  </Reference>
  <Reference Include="FacebookNamedPipeClient">
  <HintPath>D:/unity/Scrabble/Assets/FacebookSDK/Plugins/Gameroom/FacebookNamedPipeClient.dll</HintPath>
- </Reference>
- <Reference Include="Facebook.Unity.Android">
- <HintPath>D:/unity/Scrabble/Assets/FacebookSDK/Plugins/iOS/Facebook.Unity.Android.dll</HintPath>
- </Reference>
- <Reference Include="Facebook.Unity.IOS">
- <HintPath>D:/unity/Scrabble/Assets/FacebookSDK/Plugins/iOS/Facebook.Unity.IOS.dll</HintPath>
  </Reference>
  <Reference Include="Facebook.Unity.Settings">
  <HintPath>D:/unity/Scrabble/Assets/FacebookSDK/Plugins/Settings/Facebook.Unity.Settings.dll</HintPath>
