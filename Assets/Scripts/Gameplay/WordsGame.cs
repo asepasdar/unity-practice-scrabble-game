@@ -14,6 +14,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
     [SerializeField] private GameObject defaultTile, recallBtn, shuffleBtn;
     [SerializeField] AudioSource slotAudio;
     [SerializeField] private Text scoreText, timer, whosturn;
+    [SerializeField] int jumlahRound = 2;
 
     //singleton
     private static WordsGame _instance;
@@ -40,7 +41,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
     private bool isEnemyPointSet = false;
     private int checkTime = 0; // sudah berapa detik / kali di check batas 5
     public static WordsGame Instance { get { return _instance; } }
-    private const string ipadd = "172.16.8.67:45456";
+    private const string ipadd = "172.16.8.33:45456";
     void Awake()
     {
         scoreText.text = PlayerPrefs.GetInt("room_id").ToString() + " " + System.DateTime.Now;
@@ -149,6 +150,9 @@ public class WordsGame : MonoBehaviour, IHasChanged {
         {
             Word apiData = convert(list["data"]);
             var lokasi = slots.GetChild(list["row"]).GetChild(list["col"]);
+            var row = (int)list["row"];
+            var col = (int)list["col"];
+            
 
             GameObject wordGenerate = Instantiate(prefabWord, lokasi);
             wordGenerate.transform.localScale = new Vector3(0.48f, 0.48f, 0.48f);
@@ -156,6 +160,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
             wordGenerate.GetComponent<MyControll>().huruf = apiData.huruf;
             wordGenerate.GetComponent<MyControll>().point = apiData.point;
             wordGenerate.transform.GetChild(0).GetComponent<Text>().text = apiData.point.ToString();
+            grid[row][col] = wordGenerate.GetComponent<MyControll>();
         }
     }
     void checkExtend()
@@ -170,17 +175,17 @@ public class WordsGame : MonoBehaviour, IHasChanged {
 
         if(checkTime > 5)
         {
-            j.AddField("point", 100);
+            j.AddField("point", 0);
             StartCoroutine(PostRequest("https://" + ipadd + "/api/game", j.Print(), returnValue => {
                 var data = JSON.Parse(returnValue);
-                CancelInvoke();
                 setScoreBoard(1, enemyTurn, data["point"]);
                 setEnemyWord(data["list"]);
                 enemyTurn++;
                 enemyScore += data["point"];
-                checkForWinner();
                 StartCoroutine(autoSubmit());
+                checkForWinner();
             }));
+            CancelInvoke();
         }
         else
         {
@@ -194,8 +199,8 @@ public class WordsGame : MonoBehaviour, IHasChanged {
                     setEnemyWord(data["list"]);
                     enemyTurn++;
                     enemyScore += data["point"];
-                    checkForWinner();
                     StartCoroutine(autoSubmit());
+                    checkForWinner();
                 }
             }));
         }
@@ -241,7 +246,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
     void checkForWinner()
     {
         Text resultText = endGame.transform.GetChild(0).GetChild(0).GetComponent<Text>();
-        if (turn == 2 && turn == enemyTurn)
+        if (turn == jumlahRound && turn == enemyTurn)
         {
             if (myScore == enemyScore)
                 resultText.text = "DRAW";
@@ -265,6 +270,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
             var data = JSON.Parse(returnValue);
             if(data["id"] == 0)
             {
+                checkTime = 0;
                 InvokeRepeating("checkExtend", 0f, 1f);
             }
             else
@@ -273,8 +279,8 @@ public class WordsGame : MonoBehaviour, IHasChanged {
                 setEnemyWord(data["list"]);
                 enemyTurn++;
                 enemyScore += data["point"];
-                checkForWinner();
                 StartCoroutine(autoSubmit());
+                checkForWinner();
             }
             
         }));

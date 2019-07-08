@@ -17,7 +17,7 @@ public class LobbyList : MonoBehaviour {
     [SerializeField] Text nama;
     [SerializeField] Sprite male, female;
 
-    private const string ipadd = "172.16.8.67:45456";
+    private const string ipadd = "172.16.8.33:45456";
     JSONNode rvData;
     // Use this for initialization
     void Start()
@@ -37,7 +37,7 @@ public class LobbyList : MonoBehaviour {
             else
                 error.SetActive(false);
         }));
-        //PlayerPrefs.DeleteAll();
+        PlayerPrefs.DeleteAll();
         if (!isAlreadyLogin())
             loginPanel.SetActive(true);
         else
@@ -289,7 +289,7 @@ public class LobbyList : MonoBehaviour {
         {
             Debug.Log("Saya berhaisl login");
             var aToken = Facebook.Unity.AccessToken.CurrentAccessToken;
-            FB.API("/me?fields=name,gender", HttpMethod.GET, r => {
+            FB.API("/me?fields=name", HttpMethod.GET, r => {
                 IDictionary dict = Json.Deserialize(r.RawResult) as IDictionary;
 
                 JSONObject j = new JSONObject(JSONObject.Type.OBJECT);
@@ -307,14 +307,10 @@ public class LobbyList : MonoBehaviour {
                         PlayerPrefs.SetString("name", data["name"]);
                         PlayerPrefs.SetString("token", data["token"]);
                         PlayerPrefs.SetString("fb_id", data["fb_id"]);
-                        PlayerPrefs.SetString("gender", dict["gender"].ToString());
+                        PlayerPrefs.SetString("gender", "male");
                         nama.text = dict["name"].ToString();
                         loginPanel.SetActive(false);
-
-                        if (dict["gender"].ToString() == "male")
-                            profile.sprite = male;
-                        else if (dict["gender"].ToString() == "female")
-                            profile.sprite = female;
+                        profile.sprite = male;
                     }
                     else
                     {
