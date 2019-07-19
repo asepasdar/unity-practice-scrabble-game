@@ -41,7 +41,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
     private bool isEnemyPointSet = false;
     private int checkTime = 0; // sudah berapa detik / kali di check batas 5
     public static WordsGame Instance { get { return _instance; } }
-    private const string ipadd = "172.16.8.33:45456";
+    private const string ipadd = "172.16.8.162:45456";
     void Awake()
     {
         scoreText.text = PlayerPrefs.GetInt("room_id").ToString() + " " + System.DateTime.Now;
@@ -56,7 +56,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
             //Get detail user guest
             StartCoroutine(GetRequest("https://" + ipadd + "/api/user/" + roomData["user_guest"], rguest => {
                 user_guestData = JSON.Parse(rguest);
-                InvokeRepeating("startPlay", 0f, 1f);
+                
             }));
 
             JSONObject j = new JSONObject(JSONObject.Type.OBJECT);
@@ -82,7 +82,9 @@ public class WordsGame : MonoBehaviour, IHasChanged {
                 k.AddField("ready_p2", "1");
             }
 
-            StartCoroutine(PostRequest("https://" + ipadd + "/api/start/0", k.Print(), rReady => { }));
+            StartCoroutine(PostRequest("https://" + ipadd + "/api/start/0", k.Print(), rReady => {
+                InvokeRepeating("startPlay", 0f, 1f);
+            }));
         }));
 
         
@@ -173,7 +175,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
         j.AddField("user_id", enemyData["id"].ToString());
         j.AddField("room_id", PlayerPrefs.GetInt("room_id"));
 
-        if(checkTime > 5)
+        if(checkTime > 10)
         {
             j.AddField("point", 0);
             StartCoroutine(PostRequest("https://" + ipadd + "/api/game", j.Print(), returnValue => {
@@ -224,7 +226,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
         StartCoroutine(startCountDown(14));
         yield return new WaitForSeconds(14);
         submitWords();
-        StartCoroutine(waitForEnemy());
+        
     }
     IEnumerator waitForEnemy()
     {
@@ -559,6 +561,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
             setScoreBoard(0, turn, data["point"]);
             myScore += data["point"];
             turn++;
+            StartCoroutine(waitForEnemy());
             checkForWinner();
         }));
 

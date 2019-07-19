@@ -17,7 +17,7 @@ public class LobbyList : MonoBehaviour {
     [SerializeField] Text nama;
     [SerializeField] Sprite male, female;
 
-    private const string ipadd = "172.16.8.33:45456";
+    private const string ipadd = "172.16.8.162:45456";
     JSONNode rvData;
     // Use this for initialization
     void Start()
@@ -85,13 +85,7 @@ public class LobbyList : MonoBehaviour {
     {
         if (PlayerPrefs.HasKey("user_id"))
         {
-            if (PlayerPrefs.GetString("fb_id") == "guest")
-                return true;
-            else
-            {
-                PlayerPrefs.DeleteAll();
-                return false;
-            }
+            return true;
         }
 
         return false;

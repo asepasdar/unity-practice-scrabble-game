@@ -26687,6 +26687,7 @@ MonoBehaviour:
   scoreText: {fileID: 1264916562}
   timer: {fileID: 845904021}
   whosturn: {fileID: 1380200663}
+  jumlahRound: 2
 --- !u!1 &1734008568
 GameObject:
   m_ObjectHideFlags: 0
