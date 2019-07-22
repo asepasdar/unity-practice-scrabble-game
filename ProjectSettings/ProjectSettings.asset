@@ -727,7 +727,7 @@ PlayerSettings:
   cloudServicesEnabled:
     UNet: 1
   facebookSdkVersion: 7.9.4
-  apiCompatibilityLevel: 2
+  apiCompatibilityLevel: 3
   cloudProjectId: 25069bb4-5dfb-45c3-9f76-a780ec45446b
   projectName: Scrabble (2)
   organizationId: godwithoutcd

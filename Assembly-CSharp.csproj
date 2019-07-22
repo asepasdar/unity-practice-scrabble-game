@@ -66,6 +66,7 @@
      <Compile Include="Assets\FacebookSDK\Examples\Scripts\SubMenus\Pay.cs" />
      <Compile Include="Assets\JSON\JSONObject.cs" />
      <Compile Include="Assets\JSON\VectorTemplates.cs" />
+     <Compile Include="Assets\Scripts\API\ApiControl.cs" />
      <Compile Include="Assets\Scripts\Etc\SimpleJSON.cs" />
      <Compile Include="Assets\Scripts\Gameplay\MyControll.cs" />
      <Compile Include="Assets\Scripts\Gameplay\Slot.cs" />
@@ -74,6 +75,7 @@
      <Compile Include="Assets\Scripts\Gameplay\WordsGame.cs" />
      <Compile Include="Assets\Scripts\Lobby\EnterLobby.cs" />
      <Compile Include="Assets\Scripts\Lobby\LobbyList.cs" />
+     <Compile Include="Assets\Scripts\Lobby\MenuData.cs" />
      <Compile Include="Assets\UI\Fantasy Mobile UI\Example\Scripts\CoolDown.cs" />
      <Compile Include="Assets\UI\Fantasy Mobile UI\Example\Scripts\ToggleSlider.cs" />
      <Compile Include="Assets\UI\GUIPackCartoon\Demo\Scripts\AnimatedButton.cs" />

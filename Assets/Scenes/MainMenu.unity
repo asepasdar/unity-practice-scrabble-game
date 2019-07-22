@@ -913,6 +913,12 @@ CanvasRenderer:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 280688999}
   m_CullTransparentMesh: 0
+--- !u!114 &299613517 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114327925820977452, guid: 38c9da95b3d783242ab5be531db1217e,
+    type: 2}
+  m_PrefabInternal: {fileID: 795598082}
+  m_Script: {fileID: 708705254, guid: f70555f144d8491a825f0804e09c671c, type: 3}
 --- !u!1 &328682406
 GameObject:
   m_ObjectHideFlags: 0
@@ -1332,7 +1338,7 @@ GameObject:
   - component: {fileID: 556128335}
   - component: {fileID: 556128337}
   m_Layer: 5
-  m_Name: Panel
+  m_Name: ListData
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1512,6 +1518,10 @@ Prefab:
       propertyPath: m_RaycastTarget
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1872589575117792, guid: 38c9da95b3d783242ab5be531db1217e, type: 2}
+      propertyPath: m_Name
+      value: Room Master
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 38c9da95b3d783242ab5be531db1217e, type: 2}
   m_IsPrefabAsset: 0
@@ -1520,6 +1530,52 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 224587413611161952, guid: 38c9da95b3d783242ab5be531db1217e,
     type: 2}
   m_PrefabInternal: {fileID: 664595012}
+--- !u!1 &669615322
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 669615324}
+  - component: {fileID: 669615323}
+  m_Layer: 0
+  m_Name: ApiControl
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &669615323
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 669615322}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db05d1a106c4aea4b985ab4294d076ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &669615324
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 669615322}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 55.316628, y: 360.7853, z: -0.09375}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &730752733 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114327925820977452, guid: 38c9da95b3d783242ab5be531db1217e,
+    type: 2}
+  m_PrefabInternal: {fileID: 664595012}
+  m_Script: {fileID: 708705254, guid: f70555f144d8491a825f0804e09c671c, type: 3}
 --- !u!1 &754306320
 GameObject:
   m_ObjectHideFlags: 0
@@ -1816,6 +1872,10 @@ Prefab:
         type: 2}
       propertyPath: m_RaycastTarget
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1872589575117792, guid: 38c9da95b3d783242ab5be531db1217e, type: 2}
+      propertyPath: m_Name
+      value: Guest
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 38c9da95b3d783242ab5be531db1217e, type: 2}
@@ -3303,7 +3363,7 @@ GameObject:
   - component: {fileID: 1476500175}
   - component: {fileID: 1476500180}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: LobbyControl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3403,16 +3463,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d01a31cf7997511498c09014f4938a72, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefabRoom: {fileID: 1085446503036154, guid: 1ff43bc40bfb53240a4c57e1f4ad1ca2, type: 2}
-  waitLobby: {fileID: 246294101}
-  listLobby: {fileID: 1168735578}
-  loginPanel: {fileID: 878727009}
-  wait: {fileID: 1216652725}
-  error: {fileID: 1538144224}
-  profile: {fileID: 1414017304}
-  nama: {fileID: 1528332490}
-  male: {fileID: 21300000, guid: 8d5002cb2cda046f7ae9838956580fdd, type: 3}
-  female: {fileID: 21300000, guid: ea89a7cd19f1b4fc58c988c61b121401, type: 3}
+  menu: {fileID: 2081549063}
+  api: {fileID: 669615323}
 --- !u!1 &1501425419
 GameObject:
   m_ObjectHideFlags: 0
@@ -4148,6 +4200,11 @@ CanvasRenderer:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1927566167}
   m_CullTransparentMesh: 0
+--- !u!1 &2019242249 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1478644259336792, guid: 38c9da95b3d783242ab5be531db1217e,
+    type: 2}
+  m_PrefabInternal: {fileID: 795598082}
 --- !u!1 &2037734906
 GameObject:
   m_ObjectHideFlags: 0
@@ -4259,6 +4316,61 @@ CanvasRenderer:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 2037734906}
   m_CullTransparentMesh: 0
+--- !u!1 &2081549061
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2081549062}
+  - component: {fileID: 2081549063}
+  m_Layer: 0
+  m_Name: MenuData
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2081549062
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2081549061}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 334, y: 198.49992, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2081549063
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2081549061}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 628aa0648565915409541423ec4b9ce4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  WaitLobby: {fileID: 246294101}
+  LoginPanel: {fileID: 878727009}
+  WaitPanel: {fileID: 1216652725}
+  RoomMaster: {fileID: 730752733}
+  RoomGuest: {fileID: 299613517}
+  RoomPanelGuest: {fileID: 2019242249}
+  ListLobby: {fileID: 1168735578}
+  ListDataLobby: {fileID: 556128331}
+  ErrorPanel: {fileID: 1538144224}
+  ErrorMessage: {fileID: 754306322}
+  Profile: {fileID: 1414017304}
+  Name: {fileID: 1528332490}
+  Male: {fileID: 21300000, guid: 8d5002cb2cda046f7ae9838956580fdd, type: 3}
+  Female: {fileID: 21300000, guid: ea89a7cd19f1b4fc58c988c61b121401, type: 3}
+  PrefabRoom: {fileID: 1085446503036154, guid: 1ff43bc40bfb53240a4c57e1f4ad1ca2, type: 2}
 --- !u!1 &2099181650
 GameObject:
   m_ObjectHideFlags: 0

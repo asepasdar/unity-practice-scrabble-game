@@ -16,6 +16,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
     [SerializeField] private Text scoreText, timer, whosturn;
     [SerializeField] int jumlahRound = 2;
 
+    public ApiControl api;
     //singleton
     private static WordsGame _instance;
     private int turn = 1, enemyTurn = 1;
