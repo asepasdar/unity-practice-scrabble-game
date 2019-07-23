@@ -9894,8 +9894,10 @@ MonoBehaviour:
   EnemyName: {fileID: 1322775679}
   JumlahRound: 2
   SlotAudio: {fileID: 2055218141}
-  TextField: {fileID: 0}
-  SearchResult: {fileID: 0}
+  ClipGetPoint: {fileID: 8300000, guid: 68ecf1db450e26a49ac3de766953f475, type: 3}
+  ClipDragWord: {fileID: 8300000, guid: e43a3cffcc90ac94eae7c39ae8a25e18, type: 3}
+  TextField: {fileID: 579071284}
+  SearchResult: {fileID: 663281852}
 --- !u!1 &579071282
 GameObject:
   m_ObjectHideFlags: 0
@@ -26829,7 +26831,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Gdata: {fileID: 578854654}
   MyApi: {fileID: 241813916}
-  Dict: {fileID: 0}
+  Dict: {fileID: 64820799}
 --- !u!1 &1734008568
 GameObject:
   m_ObjectHideFlags: 0
@@ -31400,7 +31402,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: e43a3cffcc90ac94eae7c39ae8a25e18, type: 3}
+  m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1

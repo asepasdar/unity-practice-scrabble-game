@@ -41,6 +41,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
     public static WordsGame Instance { get { return _instance; } }
     void Awake()
     {
+        Gdata.Cover.SetActive(true);
         Gdata.ScoreText.text = PlayerPrefs.GetInt("room_id").ToString() + " " + System.DateTime.Now;
         MyApi.DoGetRequest("/api/values/" + PlayerPrefs.GetInt("room_id"), returnValue => {
             roomData = returnValue;
@@ -317,6 +318,12 @@ public class WordsGame : MonoBehaviour, IHasChanged {
     }
     public void playSlotAudio()
     {
+        Gdata.SlotAudio.clip = Gdata.ClipDragWord;
+        Gdata.SlotAudio.Play();
+    }
+    public void playPointAudio()
+    {
+        Gdata.SlotAudio.clip = Gdata.ClipGetPoint;
         Gdata.SlotAudio.Play();
     }
     void Quit()
@@ -514,6 +521,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
             point += polaKananBawah(word[0], word[1]);
             point += polaKiriAtas(word[0], word[1]);
         }
+        if (point > 0) playPointAudio();
         //Kebutuhan untuk di local game
         Gdata.ScoreText.text = "Score : " + myScore.ToString();
         clearControl();

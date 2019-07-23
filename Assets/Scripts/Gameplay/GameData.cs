@@ -33,6 +33,8 @@ public class GameData : MonoBehaviour {
 
     [Header("Audio Settings")]
     public AudioSource SlotAudio;
+    public AudioClip ClipGetPoint;
+    public AudioClip ClipDragWord;
 
     [Header("Search Words Settings")]
     public InputField TextField;
