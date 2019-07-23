@@ -6,7 +6,7 @@ using UnityEngine.Networking;
 using SimpleJSON;
 
 public class ApiControl : MonoBehaviour {
-    private const string ipadd = "172.16.8.52:45456";
+    private const string ipadd = "172.16.8.143:45456";
     public void DoDeleteRequets(string method, int id, System.Action<JSONNode> callback)
     {
         StartCoroutine(DeleteRequest("https://" + ipadd + method, id, returnValue => {

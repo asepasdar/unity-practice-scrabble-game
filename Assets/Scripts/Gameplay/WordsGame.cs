@@ -9,26 +9,24 @@ using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 
 public class WordsGame : MonoBehaviour, IHasChanged {
+    /*
     [SerializeField] Transform slots;
     [SerializeField] GameObject prefabWord, cover, scoreBoard, endGame;
     [SerializeField] private GameObject defaultTile, recallBtn, shuffleBtn;
     [SerializeField] AudioSource slotAudio;
     [SerializeField] private Text scoreText, timer, whosturn;
     [SerializeField] int jumlahRound = 2;
+    */
+    [SerializeField] public GameData Gdata;
+    [SerializeField] private ApiControl MyApi;
+    [SerializeField] private WordGameDict Dict;
 
-    public ApiControl api;
     //singleton
     private static WordsGame _instance;
     private int turn = 1, enemyTurn = 1;
 
-    //tempat untuk dict words
-    private HashSet<string> dicWords = new HashSet<string>();
-    private TextAsset dictText;
-    private HashSet<string> wordInPoint = new HashSet<string>();
-    private HashSet<string> wordInSend = new HashSet<string>();
     //tempat untuk semua data word dan point dari scritable object
     private Word[] wordList;
-
 
     //Kebutuhan untuk grid dan input player
     public int[][] wordSet = new int[6][];
@@ -39,34 +37,31 @@ public class WordsGame : MonoBehaviour, IHasChanged {
     public JSONNode roomData, user_rmData, user_guestData, enemyData;
 
     //variable untuk cek apakah point enemy sudah di set
-    private bool isEnemyPointSet = false;
     private int checkTime = 0; // sudah berapa detik / kali di check batas 5
     public static WordsGame Instance { get { return _instance; } }
-    private const string ipadd = "172.16.8.162:45456";
     void Awake()
     {
-        scoreText.text = PlayerPrefs.GetInt("room_id").ToString() + " " + System.DateTime.Now;
-        StartCoroutine(GetRequest("https://"+ipadd+"/api/values/" + PlayerPrefs.GetInt("room_id"), returnValue => {
-            roomData = JSON.Parse(returnValue);
+        Gdata.ScoreText.text = PlayerPrefs.GetInt("room_id").ToString() + " " + System.DateTime.Now;
+        MyApi.DoGetRequest("/api/values/" + PlayerPrefs.GetInt("room_id"), returnValue => {
+            roomData = returnValue;
 
             //Get detail user rm
-            StartCoroutine(GetRequest("https://" + ipadd + "/api/user/" + roomData["user_rm"], rval => {
-                user_rmData = JSON.Parse(rval);
-            }));
+            MyApi.DoGetRequest("/api/user/" + roomData["user_rm"], rval => {
+                user_rmData = rval;
+            });
 
             //Get detail user guest
-            StartCoroutine(GetRequest("https://" + ipadd + "/api/user/" + roomData["user_guest"], rguest => {
-                user_guestData = JSON.Parse(rguest);
+            MyApi.DoGetRequest("/api/user/" + roomData["user_guest"], rguest => {
+                user_guestData = rguest;
                 
-            }));
+            });
 
             JSONObject j = new JSONObject(JSONObject.Type.OBJECT);
             j.AddField("id", roomData["id"].ToString());
             j.AddField("user_rm", roomData["user_rm"].ToString());
             j.AddField("user_guest", roomData["user_guest"].ToString());
             j.AddField("status", 2);
-            StartCoroutine(PostRequest("https://" + ipadd + "/api/start/", j.Print(), myCallback => {
-            }));
+            MyApi.DoPostRequest("/api/start/", j, myCallback => {});
 
             JSONObject k = new JSONObject(JSONObject.Type.OBJECT);
 
@@ -83,14 +78,14 @@ public class WordsGame : MonoBehaviour, IHasChanged {
                 k.AddField("ready_p2", "1");
             }
 
-            StartCoroutine(PostRequest("https://" + ipadd + "/api/start/0", k.Print(), rReady => {
+            MyApi.DoPostRequest("/api/start/0", k, rReady => {
                 InvokeRepeating("startPlay", 0f, 1f);
-            }));
-        }));
+            });
+        });
 
         
 
-        InitializeDictionary("ospd"); //load dict word
+        
         wordList = Resources.LoadAll<Word>("Words"); //Data word scriptable object
         RandomWord(); //acak kata yang akan di tampilkan
 
@@ -111,30 +106,30 @@ public class WordsGame : MonoBehaviour, IHasChanged {
     {
         if (!checkPlay())
         {
-            StartCoroutine(GetRequest("https://" + ipadd + "/api/values/" + PlayerPrefs.GetInt("room_id"), returnValue =>
+            MyApi.DoGetRequest("/api/values/" + PlayerPrefs.GetInt("room_id"), returnValue =>
             {
-                roomData = JSON.Parse(returnValue);
+                roomData = returnValue;
                 checkPlay();
-            }));
+            });
         }
     }
     public bool checkPlay()
     {
         if (roomData["ready_p1"] == 1 && roomData["ready_p2"] == 1)
         {
-            cover.SetActive(false);
+            Gdata.Cover.SetActive(false);
             if (PlayerPrefs.GetInt("user_id") == user_guestData["id"])
             {
-                scoreBoard.transform.parent.GetChild(0).GetComponent<Text>().text = user_guestData["name"];
-                scoreBoard.transform.parent.GetChild(1).GetComponent<Text>().text = user_rmData["name"];
+                Gdata.MyName.text = user_guestData["name"];
+                Gdata.EnemyName.text = user_rmData["name"];
                 enemyData = user_rmData;
                 ChangeControl(false);
                 StartCoroutine(waitForEnemy());
             }
             else
             {
-                scoreBoard.transform.parent.GetChild(1).GetComponent<Text>().text = user_guestData["name"];
-                scoreBoard.transform.parent.GetChild(0).GetComponent<Text>().text = user_rmData["name"];
+                Gdata.MyName.text = user_guestData["name"];
+                Gdata.EnemyName.text = user_rmData["name"];
                 enemyData = user_guestData;
                 StartCoroutine(autoSubmit());
             }
@@ -145,19 +140,19 @@ public class WordsGame : MonoBehaviour, IHasChanged {
     }
     void setScoreBoard(int enemyOrPlayer, int abcd, int score)
     {
-        scoreBoard.transform.GetChild(enemyOrPlayer).GetChild(abcd - 1).GetChild(0).GetComponent<Text>().text = score.ToString();
+        Gdata.ScoreBoard.transform.GetChild(enemyOrPlayer).GetChild(abcd - 1).GetChild(0).GetComponent<Text>().text = score.ToString();
     }
     void setEnemyWord (JSONNode data)
     {
         foreach(JSONNode list in data)
         {
             Word apiData = convert(list["data"]);
-            var lokasi = slots.GetChild(list["row"]).GetChild(list["col"]);
+            var lokasi = Gdata.Slots[list["row"]].GetChild(list["col"]);
             var row = (int)list["row"];
             var col = (int)list["col"];
             
 
-            GameObject wordGenerate = Instantiate(prefabWord, lokasi);
+            GameObject wordGenerate = Instantiate(Gdata.PrefabWord, lokasi);
             wordGenerate.transform.localScale = new Vector3(0.48f, 0.48f, 0.48f);
             wordGenerate.GetComponent<Image>().sprite = apiData.sprite;
             wordGenerate.GetComponent<MyControll>().huruf = apiData.huruf;
@@ -179,22 +174,20 @@ public class WordsGame : MonoBehaviour, IHasChanged {
         if(checkTime > 10)
         {
             j.AddField("point", 0);
-            StartCoroutine(PostRequest("https://" + ipadd + "/api/game", j.Print(), returnValue => {
-                var data = JSON.Parse(returnValue);
+            MyApi.DoPostRequest("/api/game", j, data => {
                 setScoreBoard(1, enemyTurn, data["point"]);
                 setEnemyWord(data["list"]);
                 enemyTurn++;
                 enemyScore += data["point"];
                 StartCoroutine(autoSubmit());
                 checkForWinner();
-            }));
+            });
             CancelInvoke();
         }
         else
         {
             Debug.Log("check" + checkTime);
-            StartCoroutine(PostRequest("https://" + ipadd + "/api/game/" + enemyTurn, j.Print(), returnValue => {
-                var data = JSON.Parse(returnValue);
+            MyApi.DoPostRequest("/api/game/" + enemyTurn, j, data => {
                 if (data["id"] != 0)
                 {
                     CancelInvoke();
@@ -205,7 +198,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
                     StartCoroutine(autoSubmit());
                     checkForWinner();
                 }
-            }));
+            });
         }
         
     }
@@ -216,13 +209,13 @@ public class WordsGame : MonoBehaviour, IHasChanged {
         {
             normalizedTime -= Time.deltaTime;
             var fix = (int)normalizedTime;
-            timer.text = fix.ToString();
+            Gdata.Timer.text = fix.ToString();
             yield return null;
         }
     }
     IEnumerator autoSubmit()
     {
-        whosturn.text = "<color=white>Your turn</color>";
+        Gdata.WhosTurn.text = "<color=white>Your turn</color>";
         ChangeControl(true);
         StartCoroutine(startCountDown(14));
         yield return new WaitForSeconds(14);
@@ -231,7 +224,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
     }
     IEnumerator waitForEnemy()
     {
-        whosturn.text = "<color=red>Enemy's turn</color>";
+        Gdata.WhosTurn.text = "<color=red>Enemy's turn</color>";
         ChangeControl(false);
         if (turn > 2)
         {
@@ -248,17 +241,16 @@ public class WordsGame : MonoBehaviour, IHasChanged {
     }
     void checkForWinner()
     {
-        Text resultText = endGame.transform.GetChild(0).GetChild(0).GetComponent<Text>();
-        if (turn == jumlahRound && turn == enemyTurn)
+        if (turn == Gdata.JumlahRound && turn == enemyTurn)
         {
             if (myScore == enemyScore)
-                resultText.text = "DRAW";
+                Gdata.TextResult.text = "DRAW";
             else
             {
                 string winOrLose = myScore > enemyScore ? "WIN" : "LOSE";
-                resultText.text = "You - " + winOrLose;
+                Gdata.TextResult.text = "You - " + winOrLose;
             }
-            endGame.SetActive(true);
+            Gdata.EndGame.SetActive(true);
             Invoke("Quit", 5f);
         }
     }
@@ -269,8 +261,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
         j.AddField("turn", enemyTurn);
         j.AddField("user_id", enemyData["id"].ToString());
         j.AddField("room_id", PlayerPrefs.GetInt("room_id"));
-        StartCoroutine(PostRequest("https://" + ipadd + "/api/game/" + enemyTurn, j.Print(), returnValue => {
-            var data = JSON.Parse(returnValue);
+        MyApi.DoPostRequest("/api/game/" + enemyTurn, j, data => {
             if(data["id"] == 0)
             {
                 checkTime = 0;
@@ -286,26 +277,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
                 checkForWinner();
             }
             
-        }));
-    }
-    protected void InitializeDictionary(string filename)
-    {
-        dictText = (TextAsset)Resources.Load(filename, typeof(TextAsset));
-        var text = dictText.text;
-
-        foreach (string s in text.Split('\n'))
-        {
-            dicWords.Add(s);
-        }
-    }
-    public bool CheckWord(string word, int minLength)
-    {
-        if (word.Length < minLength)
-        {
-            return false;
-        }
-
-        return (dicWords.Contains(word.ToUpper()));
+        });
     }
 
     private void ResetWordSet()
@@ -319,13 +291,13 @@ public class WordsGame : MonoBehaviour, IHasChanged {
     }
     private int checkForPoint(string hasil, int point)
     {
-        if (CheckWord(hasil, 1))
+        if (Dict.CheckWord(hasil, 1))
         {
-            if (wordInPoint.Contains(hasil))
+            if (Dict.GetWordInPoint().Contains(hasil))
                 return 0;
             else
             {
-                wordInPoint.Add(hasil);
+                Dict.GetWordInPoint().Add(hasil);
                 return point;
             }
         }
@@ -345,7 +317,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
     }
     public void playSlotAudio()
     {
-        slotAudio.Play();
+        Gdata.SlotAudio.Play();
     }
     void Quit()
     {
@@ -354,14 +326,14 @@ public class WordsGame : MonoBehaviour, IHasChanged {
         j.AddField("user_rm", roomData["user_rm"].ToString());
         j.AddField("user_guest", roomData["user_guest"].ToString());
         j.AddField("status", 3);
-        StartCoroutine(PostRequest("https://" + ipadd + "/api/start/", j.Print(), myCallback => {
-        }));
+        MyApi.DoPostRequest("/api/start/", j, myCallback => {
+        });
         
         PlayerPrefs.DeleteKey("room_id");
         SceneManager.LoadScene(0);
     }
 
-    // INI KUMPULAN FUNGSI PENGECEKAN WORD SESUAI POLA MASING2
+    //=========================== INI KUMPULAN FUNGSI PENGECEKAN WORD SESUAI POLA MASING2 =====================
 
     //Pola Pengecekan nilai dari kanan ke kiri
     private int polaKiri(int row, int col)
@@ -512,7 +484,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
         return checkForPoint(hasil, point);
     }
 
-    //END KUMPULAN FUNGSI PENGECEKAN
+    //=========================== END FUNGSI PENGECEKAN ==========================================================
 
 
     public void submitWords()
@@ -528,9 +500,9 @@ public class WordsGame : MonoBehaviour, IHasChanged {
                 data.AddField("row", word[0]);
                 data.AddField("col", word[1]);
                 data.AddField("data", grid[word[0]][word[1]].GetComponent<MyControll>().huruf);
-                if (!wordInSend.Contains(word[0].ToString() + word[1].ToString()) && grid[word[0]][word[1]] != null)
+                if (!Dict.GetWordInSend().Contains(word[0].ToString() + word[1].ToString()) && grid[word[0]][word[1]] != null)
                 {
-                    wordInSend.Add(word[0].ToString() + word[1].ToString());
+                    Dict.GetWordInSend().Add(word[0].ToString() + word[1].ToString());
                     list.Add(data);
 
                 }
@@ -543,7 +515,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
             point += polaKiriAtas(word[0], word[1]);
         }
         //Kebutuhan untuk di local game
-        scoreText.text = "Score : " + myScore.ToString();
+        Gdata.ScoreText.text = "Score : " + myScore.ToString();
         clearControl();
         ResetWordSet();
         RandomWord();
@@ -557,29 +529,28 @@ public class WordsGame : MonoBehaviour, IHasChanged {
         j.AddField("list", list);
 
 
-        StartCoroutine(PostRequest("https://" + ipadd + "/api/game", j.Print(), returnValue => {
-            var data = JSON.Parse(returnValue);
+        MyApi.DoPostRequest("/api/game/", j, data => {
             setScoreBoard(0, turn, data["point"]);
             myScore += data["point"];
             turn++;
             StartCoroutine(waitForEnemy());
             checkForWinner();
-        }));
+        });
 
-        wordInSend.Clear();
+        Dict.GetWordInSend().Clear();
     }
     public void RandomWord()
     {
         int urutan = 0;
-        for (int i=0; i < defaultTile.transform.childCount; i++)
+        for (int i=0; i < Gdata.DefaultTile.transform.childCount; i++)
         {
-            GameObject slot = defaultTile.transform.GetChild(i).gameObject;
+            GameObject slot = Gdata.DefaultTile.transform.GetChild(i).gameObject;
             //Jika default tile memiliki komponen di dalamnya, maka destroy
             if (slot.transform.childCount > 0)
                 Destroy(slot.transform.GetChild(0).gameObject);
 
             Word data = wordList[Random.Range(0, wordList.Length)];
-            GameObject wordGenerate = Instantiate(prefabWord, slot.transform);
+            GameObject wordGenerate = Instantiate(Gdata.PrefabWord, slot.transform);
             wordGenerate.GetComponent<Image>().sprite = data.sprite;
             wordGenerate.GetComponent<MyControll>().huruf = data.huruf;
             wordGenerate.GetComponent<MyControll>().urutan = urutan;
@@ -593,7 +564,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
     {
         foreach (int[] word in wordSet)
         {
-            if (word != null && slots.GetChild(word[0]).GetChild(word[1]).childCount > 0)
+            if (word != null && Gdata.Slots[word[0]].GetChild(word[1]).childCount > 0)
                 return true;
         }
         return false;
@@ -604,20 +575,20 @@ public class WordsGame : MonoBehaviour, IHasChanged {
     {
         if (isWordInGrid())
         {
-            recallBtn.SetActive(true);
-            shuffleBtn.SetActive(false);
+            Gdata.RecallBtn.SetActive(true);
+            Gdata.ShuffleBtn.SetActive(false);
         }
         else
         {
-            recallBtn.SetActive(false);
-            shuffleBtn.SetActive(true);
+            Gdata.RecallBtn.SetActive(false);
+            Gdata.ShuffleBtn.SetActive(true);
         }
     }
     private void ChangeControl(bool param)
     {
-        for (int i = 0; i < defaultTile.transform.childCount; i++)
+        for (int i = 0; i < Gdata.DefaultTile.transform.childCount; i++)
         {
-            MyControll word = defaultTile.transform.GetChild(i).GetChild(0).GetComponent<MyControll>();
+            MyControll word = Gdata.DefaultTile.transform.GetChild(i).GetChild(0).GetComponent<MyControll>();
             word.canDrag = param;
         }
     }
@@ -625,8 +596,8 @@ public class WordsGame : MonoBehaviour, IHasChanged {
     {
         foreach(int[] word in wordSet)
         {
-            if (word != null && slots.GetChild(word[0]).GetChild(word[1]).childCount > 0)
-                slots.GetChild(word[0]).GetChild(word[1]).GetChild(0).GetComponent<MyControll>().setToDefault();
+            if (word != null && Gdata.Slots[word[0]].GetChild(word[1]).childCount > 0)
+                Gdata.Slots[word[0]].GetChild(word[1]).GetChild(0).GetComponent<MyControll>().setToDefault();
         }
         ResetWordSet();
         RecallOrShuffle();
@@ -635,59 +606,14 @@ public class WordsGame : MonoBehaviour, IHasChanged {
     {
         foreach(int[] word in wordSet)
         {
-            if (word != null && slots.GetChild(word[0]).GetChild(word[1]).childCount > 0)
-                Destroy(slots.GetChild(word[0]).GetChild(word[1]).GetChild(0).gameObject);
+            if (word != null && Gdata.Slots[word[0]].GetChild(word[1]).childCount > 0)
+                Destroy(Gdata.Slots[word[0]].GetChild(word[1]).GetChild(0).gameObject);
         }
         ResetWordSet();
         RandomWord();
     }
     // End kebutuhan fungsi control pemain
 
-    //Kebutuhan API
-    IEnumerator GetRequest(string uri, System.Action<string> callback = null)
-    {
-        ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => false;
-        using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
-        {
-            //Accept all certificates
-            webRequest.certificateHandler = new AcceptAllCertificatesSignedWithASpecificKeyPublicKey();
-            webRequest.SetRequestHeader("token", "123123");
-            // Request and wait for the desired page.
-            yield return webRequest.SendWebRequest();
-
-            string[] pages = uri.Split('/');
-            int page = pages.Length - 1;
-
-            if (webRequest.isNetworkError)
-                Debug.Log(pages[page] + ": Error: " + webRequest.error);
-            else
-                callback(webRequest.downloadHandler.text);
-        }
-    }
-    IEnumerator PostRequest(string url, string json, System.Action<string> callback = null)
-    {
-        byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(json);
-        var uwr = new UnityWebRequest(url, "POST");
-        uwr.chunkedTransfer = false;
-        uwr.uploadHandler = (UploadHandler)new UploadHandlerRaw(jsonToSend);
-        uwr.uploadHandler.contentType = "application/json";
-        uwr.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
-        uwr.SetRequestHeader("Content-Type", "application/json");
-        uwr.SetRequestHeader("Accept", "application/json");
-        uwr.SetRequestHeader("token", "123123");
-        uwr.SetRequestHeader("api-version", "0.1");
-        uwr.certificateHandler = new AcceptAllCertificatesSignedWithASpecificKeyPublicKey();
-
-        //Send the request then wait here until it returns
-        //Send the request then wait here until it returns
-        yield return uwr.SendWebRequest();
-
-        if (uwr.isNetworkError)
-            Debug.Log("Error While Sending: " + uwr.error);
-        else
-            callback(uwr.downloadHandler.text);
-    }
-    //END Kebutuhan API
     private Word convert(string huruf)
     {
         int indexHuruf = 0;

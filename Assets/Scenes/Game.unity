@@ -1502,6 +1502,46 @@ MonoBehaviour:
   row: 0
   col: 0
   isDefaultSlot: 1
+--- !u!1 &64820797
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 64820798}
+  - component: {fileID: 64820799}
+  m_Layer: 0
+  m_Name: DictGame
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &64820798
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 64820797}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 554.2695, y: 370.80643, z: -0.75}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &64820799
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 64820797}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba443127bbb0c844abcf52017889d73d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &67422814
 GameObject:
   m_ObjectHideFlags: 0
@@ -3719,6 +3759,46 @@ CanvasRenderer:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 238008463}
   m_CullTransparentMesh: 0
+--- !u!1 &241813915
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 241813917}
+  - component: {fileID: 241813916}
+  m_Layer: 0
+  m_Name: ApiControl
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &241813916
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 241813915}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db05d1a106c4aea4b985ab4294d076ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &241813917
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 241813915}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 276.91815, y: 298.964, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &244794326
 GameObject:
   m_ObjectHideFlags: 0
@@ -9743,6 +9823,79 @@ CanvasRenderer:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 578818707}
   m_CullTransparentMesh: 0
+--- !u!1 &578854652
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 578854653}
+  - component: {fileID: 578854654}
+  m_Layer: 0
+  m_Name: GameData
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &578854653
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 578854652}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 276.91815, y: 298.964, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &578854654
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 578854652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94372516bb39ec74884c3280701b0e04, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Slots:
+  - {fileID: 2003149364}
+  - {fileID: 1740233209}
+  - {fileID: 664702056}
+  - {fileID: 48338638}
+  - {fileID: 1477981302}
+  - {fileID: 2139398142}
+  - {fileID: 1105979983}
+  - {fileID: 767721503}
+  - {fileID: 754891086}
+  - {fileID: 1225044066}
+  - {fileID: 184087366}
+  - {fileID: 1380820795}
+  - {fileID: 372834138}
+  - {fileID: 1183917667}
+  - {fileID: 1778898466}
+  PrefabWord: {fileID: 1758485920255152, guid: 6a391c427c6749a419037d76b4ce0c95, type: 2}
+  DefaultTile: {fileID: 762770721}
+  RecallBtn: {fileID: 1260255113}
+  ShuffleBtn: {fileID: 908553104}
+  Cover: {fileID: 1966677553}
+  ScoreBoard: {fileID: 849216052}
+  TextResult: {fileID: 253098896}
+  EndGame: {fileID: 245071255}
+  ScoreText: {fileID: 1264916562}
+  Timer: {fileID: 845904021}
+  WhosTurn: {fileID: 1380200663}
+  MyName: {fileID: 1090691565}
+  EnemyName: {fileID: 1322775679}
+  JumlahRound: 2
+  SlotAudio: {fileID: 2055218141}
+  TextField: {fileID: 0}
+  SearchResult: {fileID: 0}
 --- !u!1 &579071282
 GameObject:
   m_ObjectHideFlags: 0
@@ -9901,7 +10054,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba443127bbb0c844abcf52017889d73d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  searchResult: {fileID: 663281852}
 --- !u!1 &584793716
 GameObject:
   m_ObjectHideFlags: 0
@@ -26573,7 +26725,7 @@ GameObject:
   - component: {fileID: 1722929938}
   - component: {fileID: 1722929942}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: WordsGame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26675,19 +26827,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f0b6232dc7c677408b4ea2086c5c3b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  slots: {fileID: 1679344399}
-  prefabWord: {fileID: 1758485920255152, guid: 6a391c427c6749a419037d76b4ce0c95, type: 2}
-  cover: {fileID: 1966677553}
-  scoreBoard: {fileID: 849216052}
-  endGame: {fileID: 245071255}
-  defaultTile: {fileID: 762770721}
-  recallBtn: {fileID: 1260255113}
-  shuffleBtn: {fileID: 908553104}
-  slotAudio: {fileID: 2055218141}
-  scoreText: {fileID: 1264916562}
-  timer: {fileID: 845904021}
-  whosturn: {fileID: 1380200663}
-  jumlahRound: 2
+  Gdata: {fileID: 578854654}
+  MyApi: {fileID: 241813916}
+  Dict: {fileID: 0}
 --- !u!1 &1734008568
 GameObject:
   m_ObjectHideFlags: 0
@@ -29647,7 +29789,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1966677554
 RectTransform:
   m_ObjectHideFlags: 0

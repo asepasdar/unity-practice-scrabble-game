@@ -68,6 +68,7 @@
      <Compile Include="Assets\JSON\VectorTemplates.cs" />
      <Compile Include="Assets\Scripts\API\ApiControl.cs" />
      <Compile Include="Assets\Scripts\Etc\SimpleJSON.cs" />
+     <Compile Include="Assets\Scripts\Gameplay\GameData.cs" />
      <Compile Include="Assets\Scripts\Gameplay\MyControll.cs" />
      <Compile Include="Assets\Scripts\Gameplay\Slot.cs" />
      <Compile Include="Assets\Scripts\Gameplay\Word.cs" />
