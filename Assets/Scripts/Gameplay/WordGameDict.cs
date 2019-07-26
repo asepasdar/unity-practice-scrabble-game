@@ -7,9 +7,9 @@ using UnityEngine.UI;
 public class WordGameDict : MonoBehaviour{
     // In C# using a HashSet is an O(1) operation. It's a dictionary without the keys!
     
-    private HashSet<string> DicWords = new HashSet<string>();
-    private HashSet<string> WordInPoint = new HashSet<string>();
-    private HashSet<string> WordInSend = new HashSet<string>();
+    private readonly HashSet<string> DicWords = new HashSet<string>();
+    private readonly HashSet<string> WordInPoint = new HashSet<string>();
+    private readonly HashSet<string> WordInSend = new HashSet<string>();
     private TextAsset DictText;
     void Awake()
     {

@@ -12,10 +12,11 @@ using Facebook.MiniJSON;
 
 public class LobbyList : MonoBehaviour {
 
-    [SerializeField] MenuData menu;
-    [SerializeField] ApiControl api;
+    [SerializeField] MenuData menu = new MenuData();
+    [SerializeField] ApiControl api = new ApiControl();
 
-    private JSONNode rvData; //User current room data;
+    //User current room data;
+    private JSONNode rvData; 
     void Start()
     {
         //Start init facebook SDK
@@ -32,7 +33,6 @@ public class LobbyList : MonoBehaviour {
             }
         });
 
-        //PlayerPrefs.DeleteAll();
         if (!isAlreadyLogin()) menu.LoginPanel.SetActive(true);
         else setProfile();
 

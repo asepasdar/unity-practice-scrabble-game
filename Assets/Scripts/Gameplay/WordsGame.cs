@@ -9,17 +9,10 @@ using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 
 public class WordsGame : MonoBehaviour, IHasChanged {
-    /*
-    [SerializeField] Transform slots;
-    [SerializeField] GameObject prefabWord, cover, scoreBoard, endGame;
-    [SerializeField] private GameObject defaultTile, recallBtn, shuffleBtn;
-    [SerializeField] AudioSource slotAudio;
-    [SerializeField] private Text scoreText, timer, whosturn;
-    [SerializeField] int jumlahRound = 2;
-    */
-    [SerializeField] public GameData Gdata;
-    [SerializeField] private ApiControl MyApi;
-    [SerializeField] private WordGameDict Dict;
+    
+    [SerializeField] public GameData Gdata = new GameData();
+    [SerializeField] private ApiControl MyApi = new ApiControl();
+    [SerializeField] private WordGameDict Dict = new WordGameDict();
 
     //singleton
     private static WordsGame _instance;
@@ -65,19 +58,9 @@ public class WordsGame : MonoBehaviour, IHasChanged {
             MyApi.DoPostRequest("/api/start/", j, myCallback => {});
 
             JSONObject k = new JSONObject(JSONObject.Type.OBJECT);
-
-            if (PlayerPrefs.GetInt("user_id") == roomData["user_rm"])
-            {
-                k.AddField("id", roomData["id"].ToString());
-                k.AddField("user_rm", roomData["user_rm"].ToString());
-                k.AddField("ready_p1", "1");
-            }
-            else
-            {
-                k.AddField("id", roomData["id"].ToString());
-                k.AddField("user_guest", roomData["user_guest"].ToString());
-                k.AddField("ready_p2", "1");
-            }
+            k.AddField("id", roomData["id"].ToString());
+            k.AddField(PlayerPrefs.GetInt("user_id") == roomData["user_rm"] ? "user_rm" : "user_guest", PlayerPrefs.GetInt("user_id") == roomData["user_rm"] ? roomData["user_rm"].ToString() : roomData["user_guest"].ToString());
+            k.AddField(PlayerPrefs.GetInt("user_id") == roomData["user_rm"] ? "ready_p1" : "ready_p2", "1");
 
             MyApi.DoPostRequest("/api/start/0", k, rReady => {
                 InvokeRepeating("startPlay", 0f, 1f);
@@ -714,25 +697,7 @@ public class WordsGame : MonoBehaviour, IHasChanged {
     #region IHasChanged implementation
     public void hasChanged()
     {
-        /*
-        System.Text.StringBuilder builder = new System.Text.StringBuilder();
-        builder.Append(" - ");
-        foreach (Transform row in slots)
-        {
-            foreach(Transform slot in row)
-            {
-                GameObject item = slot.transform.GetComponent<Slot>().item;
-                if (item)
-                {
-                    builder.Append(item.GetComponent<MyControll>().huruf);
-                    builder.Append(" - ");
-                }
-            }
-            
-        }
-        words.text = builder.ToString();
-        */
-        //Check apakah ada kata yang sesuai
+        
     }
 
     #endregion

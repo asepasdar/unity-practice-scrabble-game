@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\JSON\Editor\JSONChecker.cs" />
+     <Compile Include="Assets\Scripts\Editor\SonarScript.cs" />
      <None Include="Assets\FacebookSDK\Plugins\Editor\Dependencies.xml" />
      <None Include="Assets\PlayServicesResolver\Editor\play-services-resolver_v1.2.95.0.txt" />
  <Reference Include="UnityEditor.StandardEvents">

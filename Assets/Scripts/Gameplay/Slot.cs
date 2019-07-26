@@ -33,7 +33,7 @@ public class Slot : MonoBehaviour, IDropHandler
                 }
                 else if (item)
                 {
-                    if (item.GetComponent<MyControll>().canDrag == false)
+                    if (!item.GetComponent<MyControll>().canDrag)
                         MyControll.draggedObject.GetComponent<MyControll>().setToDefault();
                     else
                     {
