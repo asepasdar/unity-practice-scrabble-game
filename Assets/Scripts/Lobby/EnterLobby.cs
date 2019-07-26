@@ -6,12 +6,16 @@ using System.Net;
 using SimpleJSON;
 using System;
 
-public class EnterLobby : MonoBehaviour {
-    public int roomId;
-	// Use this for initialization
-	public void JoinLobby()
+namespace Scrabble.Logic
+{
+    public class EnterLobby : MonoBehaviour
     {
-        transform.parent.parent.parent.GetComponent<LobbyList>().JoinLobby(roomId);
+        public int roomId;
+        // Use this for initialization
+        public void JoinLobby()
+        {
+            transform.parent.parent.parent.GetComponent<LobbyList>().JoinLobby(roomId);
+        }
     }
 }
 
