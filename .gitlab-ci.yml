@@ -5,26 +5,49 @@ stages:
 .sonar_template: &sonar_definition
   stage: sonar
   tags:
-    - docker
-  script: 
+    - msbuild
+  before_script:
+    - set SONAR_SCANNER_OPTS="%SONAR_SCANNER_OPTS%"
     - |
-      docker build \
-      --build-arg DOCK_DOTNET_VER="$DOCK_DOTNET_VER" \
-      --build-arg DOTNET_SLN_NAME="$DOTNET_SLN_NAME" \
-      --build-arg SONAR_HOST_URL="$SONAR_HOST_URL" \
-      --build-arg SONAR_SCANNER_OPTS="$SONAR_SCANNER_OPTS" \
-      --build-arg SONAR_DOTNET_VER="$SONAR_DOTNET_VER" \
-      --build-arg SONAR_AUTH_TOKEN="$SONAR_AUTH_TOKEN" \
-      --build-arg SONAR_DOTNET_DIR="$SONAR_DOTNET_DIR" \
-      --build-arg SONAR_AUTH_KEY="$CI_PROJECT_PATH_SLUG" \
-      --build-arg SONAR_PROJ_NAME="$CI_PROJECT_PATH" \
-      --build-arg CI_COMMIT_SHA="$CI_COMMIT_SHA" \
-      --build-arg CI_COMMIT_REF_NAME="$CI_COMMIT_REF_NAME" \
-      --build-arg CI_PROJECT_ID="$CI_PROJECT_ID" \
-      -f Dockerfile.$REPORT_ENV \
-      -t $REPORT_ENV .
-    - docker image rm -f $REPORT_ENV
-    - echo "$REPORT_ENV DONE"
+      set SONAR_SONARQUBE_REPORT=^
+        /k:"%CI_PROJECT_PATH_SLUG%" ^
+        /n:"%CI_PROJECT_PATH%" ^
+        /d:sonar.host.url="%SONAR_HOST_URL%" ^
+        /d:sonar.login="%SONAR_AUTH_TOKEN%" ^
+        /d:sonar.verbose=true
+    - |
+      set SONAR_GATEGIT_REPORT=^
+      /d:sonar.analysis.mode=preview ^
+      /d:sonar.gitlab.commit_sha="%CI_COMMIT_SHA%" ^
+      /d:sonar.gitlab.ref_name="%CI_COMMIT_REF_NAME%" ^
+      /d:sonar.gitlab.project_id="%CI_PROJECT_ID%"
+  script:
+    - |
+      "%GenerateSln%" -batchmode -nographics -quit ^
+        -projectPath %cd% ^
+        -CacheServerIPAddress "%UNITY_CACHE_SERVER%" ^
+        -logFile GenerateSln.log ^
+        -executeMethod SonarUnity.GenerateSln
+    - |
+      IF "%REPORT_ENV%"=="sonar-gategit-report" (
+        "%SONAR_MSBUILD_HOME%\%SONAR_MSBUILD_VER%\SonarScanner.MSBuild" begin %SONAR_SONARQUBE_REPORT% %SONAR_GATEGIT_REPORT%
+      )
+    - |
+      IF "%REPORT_ENV%"=="sonar-sonarqube-report" (
+        "%SONAR_MSBUILD_HOME%\%SONAR_MSBUILD_VER%\SonarScanner.MSBuild" begin %SONAR_SONARQUBE_REPORT%
+      )
+    - MSBuild "%UNITY_SLN_NAME%".sln /t:Rebuild
+    - |
+      "%SONAR_MSBUILD_HOME%\%SONAR_MSBUILD_VER%\SonarScanner.MSBuild" end ^
+        /d:sonar.login="%SONAR_AUTH_TOKEN%"
+    - echo "%REPORT_ENV% DONE"
+
+.sonar-artifacts_template:
+  artifacts: &sonar_artifacts_definition
+    name: "sonar-GenerateSln-artifact"
+    paths:
+      - GenerateSln.log
+    expire_in: 1 week
 
 sonar_gategit:
   <<: *sonar_definition
@@ -32,6 +55,7 @@ sonar_gategit:
     REPORT_ENV: "sonar-gategit-report"
   only:
     - branches
+  artifacts: *sonar_artifacts_definition
 
 sonar_sonarqube:
   <<: *sonar_definition
@@ -39,3 +63,4 @@ sonar_sonarqube:
     REPORT_ENV: "sonar-sonarqube-report"
   only:
     - master
+  artifacts: *sonar_artifacts_definition
