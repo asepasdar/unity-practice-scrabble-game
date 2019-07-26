@@ -1,0 +1,42 @@
+stages: 
+- sonar
+
+#=================== Sonar Stage ===================
+.sonar_template: &sonar_definition
+  stage: sonar
+  tags:
+    - docker
+  script: 
+    - |
+      docker build \
+      --build-arg DOCK_DOTNET_VER="$DOCK_DOTNET_VER" \
+      --build-arg DOTNET_SLN_NAME="$DOTNET_SLN_NAME" \
+      --build-arg SONAR_HOST_URL="$SONAR_HOST_URL" \
+      --build-arg SONAR_SCANNER_OPTS="$SONAR_SCANNER_OPTS" \
+      --build-arg SONAR_DOTNET_VER="$SONAR_DOTNET_VER" \
+      --build-arg SONAR_AUTH_TOKEN="$SONAR_AUTH_TOKEN" \
+      --build-arg SONAR_DOTNET_DIR="$SONAR_DOTNET_DIR" \
+      --build-arg SONAR_AUTH_KEY="$CI_PROJECT_PATH_SLUG" \
+      --build-arg SONAR_PROJ_NAME="$CI_PROJECT_PATH" \
+      --build-arg CI_COMMIT_SHA="$CI_COMMIT_SHA" \
+      --build-arg CI_COMMIT_REF_NAME="$CI_COMMIT_REF_NAME" \
+      --build-arg CI_PROJECT_ID="$CI_PROJECT_ID" \
+      -f Dockerfile.$REPORT_ENV \
+      -t $REPORT_ENV .
+    - docker image rm -f $REPORT_ENV
+    - echo "$REPORT_ENV DONE"
+
+sonar_gategit:
+  <<: *sonar_definition
+  variables:
+    REPORT_ENV: "sonar-gategit-report"
+  only:
+    - branches
+
+sonar_sonarqube:
+  <<: *sonar_definition
+  variables:
+    REPORT_ENV: "sonar-sonarqube-report"
+  only:
+    - develop
+    - master

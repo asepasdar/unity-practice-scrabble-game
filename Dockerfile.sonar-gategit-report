@@ -1,0 +1,49 @@
+ARG DOCK_DOTNET_VER
+
+#STEP CODE SCAN, BUILD & PUBLISH PROJECT
+FROM microsoft/dotnet:${DOCK_DOTNET_VER}
+
+#Install Requirements Environment
+RUN apt-get update && \
+    apt-get install -y openjdk-8-jre && \
+    curl -sL https://deb.nodesource.com/setup_10.x -o nodesource_setup.sh && \
+    bash nodesource_setup.sh && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/* /var/cache/* /tmp/* /var/tmp/*
+
+#Setup ENV & ARG
+ARG CI_COMMIT_SHA
+ARG CI_COMMIT_REF_NAME
+ARG CI_PROJECT_ID
+ARG DOTNET_SLN_NAME
+ARG SONAR_HOST_URL
+ARG SONAR_SCANNER_OPTS
+ARG SONAR_DOTNET_VER
+ARG SONAR_AUTH_KEY
+ARG SONAR_PROJ_NAME
+ARG SONAR_AUTH_TOKEN
+ARG SONAR_DOTNET_DIR
+ENV SONAR_WORKDIR=/sonar-scanner
+ENV PATH="$PATH:${SONAR_DOTNET_DIR}"
+
+#Copy Proj to WORKDIR
+WORKDIR ${SONAR_WORKDIR}
+COPY . ./
+
+#Install dotnet-sonarscanner
+RUN dotnet tool install --global dotnet-sonarscanner --version ${SONAR_DOTNET_VER}
+
+#Run Scan and Analysis
+RUN dotnet-sonarscanner begin \
+        /k:"${SONAR_AUTH_KEY}" \
+        /n:"${SONAR_PROJ_NAME}" \
+        /d:sonar.host.url="${SONAR_HOST_URL}" \
+        /d:sonar.login="${SONAR_AUTH_TOKEN}" \
+        /d:sonar.verbose=true \
+        /d:sonar.analysis.mode=preview \
+        /d:sonar.gitlab.commit_sha="${CI_COMMIT_SHA}" \
+        /d:sonar.gitlab.ref_name="${CI_COMMIT_REF_NAME}" \
+#UNCOMENT THIS IF U WANT STILL PASSED JOB WHEN HAVE AN ERROR#        /d:sonar.gitlab.quality_gate_fail_mode="warn" \
+        /d:sonar.gitlab.project_id="${CI_PROJECT_ID}" && \
+    dotnet build ${DOTNET_SLN_NAME}.sln && \
+    dotnet-sonarscanner end /d:sonar.login="${SONAR_AUTH_TOKEN}"
