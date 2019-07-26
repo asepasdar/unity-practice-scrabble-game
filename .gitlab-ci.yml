@@ -38,5 +38,4 @@ sonar_sonarqube:
   variables:
     REPORT_ENV: "sonar-sonarqube-report"
   only:
-    - develop
     - master
