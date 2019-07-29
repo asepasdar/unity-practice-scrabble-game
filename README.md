@@ -7,5 +7,5 @@
  - Create and join lobby system
  - Game settings via [Admin Panel](http://gate.git/asep.darmawan/AdminPanel)
 
- 
- ![Scrabble](https://github.com/asepasdar/Shooter-Replica/blob/master/imgread/img1.PNG)
+
+ ![Scrabble](Welcome.PNG)
