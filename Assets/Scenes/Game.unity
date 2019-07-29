@@ -9892,7 +9892,7 @@ MonoBehaviour:
   WhosTurn: {fileID: 1380200663}
   MyName: {fileID: 1090691565}
   EnemyName: {fileID: 1322775679}
-  JumlahRound: 2
+  JumlahRound: 3
   SlotAudio: {fileID: 2055218141}
   ClipGetPoint: {fileID: 8300000, guid: 68ecf1db450e26a49ac3de766953f475, type: 3}
   ClipDragWord: {fileID: 8300000, guid: e43a3cffcc90ac94eae7c39ae8a25e18, type: 3}

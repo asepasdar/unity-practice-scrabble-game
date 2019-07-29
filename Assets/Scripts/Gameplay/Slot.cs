@@ -26,30 +26,26 @@ namespace Scrabble.Logic
         {
             if (MyControll.draggedObject != null)
             {
-                if (!isDefaultSlot) //Jika huruf di drop ke slot grid 15x15
+                if (!isDefaultSlot) //Jika huruf di drop ke slot grid 15x15 dan Jika slot grid 15x15 kosong
                 {
-                    if (!item)
+                    if (!item) //Jika slot grid 15x15 kosong
                     {
                         MyControll.draggedObject.transform.SetParent(transform);
-                        ExecuteEvents.ExecuteHierarchy<IHasChanged>(gameObject, null, (x, y) => x.hasChanged());
                     }
-                    else if (item)
+                    else if (item && !item.GetComponent<MyControll>().canDrag)
                     {
-                        if (!item.GetComponent<MyControll>().canDrag)
-                            MyControll.draggedObject.GetComponent<MyControll>().setToDefault();
-                        else
-                        {
-                            if (isDefaultSlot) MyControll.draggedObject.GetComponent<MyControll>().setToDefault();
-                            else MyControll.draggedObject.transform.SetParent(transform);
-
-
-                            item.GetComponent<MyControll>().setToDefault();
-                        }
-                        ExecuteEvents.ExecuteHierarchy<IHasChanged>(gameObject, null, (x, y) => x.hasChanged());
+                        MyControll.draggedObject.GetComponent<MyControll>().setToDefault();
                     }
-                    WordsGame.Instance.grid[row][col] = item.GetComponent<MyControll>();
-                    WordsGame.Instance.wordSet[item.GetComponent<MyControll>().urutan][0] = row;
-                    WordsGame.Instance.wordSet[item.GetComponent<MyControll>().urutan][1] = col;
+                    else
+                    {
+                        MyControll.draggedObject.transform.SetParent(transform);
+                        item.GetComponent<MyControll>().setToDefault();
+                    }
+                    MyControll Itemcontroll = item.GetComponent<MyControll>();
+                    ExecuteEvents.ExecuteHierarchy<IHasChanged>(gameObject, null, (x, y) => x.hasChanged());
+                    WordsGame.Instance.grid[row][col] = Itemcontroll;
+                    WordsGame.Instance.wordSet[Itemcontroll.urutan][0] = row;
+                    WordsGame.Instance.wordSet[Itemcontroll.urutan][1] = col;
                 }
                 else
                 {

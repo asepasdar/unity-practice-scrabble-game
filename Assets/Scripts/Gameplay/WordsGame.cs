@@ -215,10 +215,10 @@ namespace Scrabble.Logic
             StartCoroutine(startCountDown(14));
             yield return new WaitForSeconds(14);
             submitWords();
-
         }
         IEnumerator waitForEnemy()
         {
+            Destroy(MyControll.draggedObject);
             Gdata.WhosTurn.text = "<color=red>Enemy's turn</color>";
             ChangeControl(false);
             if (turn > 2)
