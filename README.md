@@ -10,4 +10,13 @@
  - 1v1 with AI (On Develop)
 
 
- ![Scrabble](Welcome.PNG)
+	![Scrabble](Welcome.PNG)
+
+
+
+## Scrabble - Scripts
+
+#### Gameplay Scripts **Assets/Scripts/Gameplay/**
+#### Lobby Scripts **Assets/Scripts/Lobby/**
+#### API **Assets/Scripts/API/**
+#### JSON Handler **Assets/Scripts/Etc/**
