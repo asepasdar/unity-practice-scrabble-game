@@ -19,5 +19,4 @@
 - Gameplay Scripts - **Assets/Scripts/Gameplay/**
 - Lobby Scripts - **Assets/Scripts/Lobby/**
 - API - **Assets/Scripts/API/**
-- Description (TODO)
 - JSON Handler - **Assets/Scripts/Etc/**
