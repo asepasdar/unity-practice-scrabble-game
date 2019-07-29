@@ -16,7 +16,11 @@
 
 ## Scrabble - Scripts
 
-#### Gameplay Scripts **Assets/Scripts/Gameplay/**
-#### Lobby Scripts **Assets/Scripts/Lobby/**
-#### API **Assets/Scripts/API/**
-#### JSON Handler **Assets/Scripts/Etc/**
+Gameplay Scripts - **Assets/Scripts/Gameplay/**
+	> Description (TODO)
+Lobby Scripts - **Assets/Scripts/Lobby/**
+	> Description (TODO)
+API - **Assets/Scripts/API/**
+	> Description (TODO)
+JSON Handler - **Assets/Scripts/Etc/**
+	> Description (TODO)
